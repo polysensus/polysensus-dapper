@@ -1,0 +1,29 @@
+{
+  "name": "@polysensus-dapper/chainpresence",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/chainpresence.js",
+  "types": "./dist/main.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "vite": "^5.3.4",
+    "vite-plugin-dts": "4.0.0-beta.1"
+  },
+  "dependencies": {
+    "@ethersproject/providers": "^5.7.2",
+    "@web3auth/base": "^8.3.0",
+    "@web3auth/ethereum-provider": "^8.3.0",
+    "@web3auth/metamask-adapter": "^8.4.0",
+    "@web3auth/modal": "^8.3.0",
+    "@web3auth/openlogin-adapter": "^8.3.0",
+    "ethers": "5.7.2",
+    "loglevel": "^1.9.1",
+    "svelte": "4.2.7"
+  }
+}
