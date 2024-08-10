@@ -48,7 +48,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@polysensus-dapper/chainpresence": "workspace:^",
+		"@polysensus-dapper/chainpresence-ethersv5": "workspace:^",
 		"@floating-ui/dom": "^1.6.4",
 		"@zerodev/ecdsa-validator": "^5.2.3",
 		"@zerodev/permissions": "^5.2.6",

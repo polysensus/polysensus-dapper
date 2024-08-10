@@ -2,7 +2,6 @@
 	import { onMount, getContext } from 'svelte';
 	import { page } from '$app/stores';
 	import ProvidersList from '$lib/components/ProvidersList.svelte';
-	import { namedProviderRoute } from '@polysensus-dapper/chainpresence';
 	import { ethers } from 'ethers';
 
 	import tugawarSol from '$lib/abi/TugAWar.json';
@@ -57,19 +56,7 @@
 		console.log(`PagePresence# refreshing login status`);
 		const connectedName = await presence.providerSwitch.refreshLoginStatus();
 		if (connectedName) await presense.select(connectedName);
-
-		const routedID = namedProviderRoute($page);
-		if (!(connectedName || routedID)) return;
-
-		// The web3auth provider remains connected until explicitly logged out. But
-		// we want to prefer the routed provider for the presence selection
-		let routedProvider, connectedProvider;
-		for (const p of providers) {
-			if (routedID && !routedProvider && p.id === routedID) routedProvider = p;
-			if (!connectedProvider && p.id === connectedName) connectedProvider = p;
-			if (connectedProvider && (!routedID || routedProvider)) break;
-		}
-		return routedProvider ?? connectedProvider;
+		return presence.providerSwitch.getCurrent();
 	}
 
 	onMount(async () => {
