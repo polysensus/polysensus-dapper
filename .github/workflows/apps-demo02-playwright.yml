@@ -1,13 +1,13 @@
 name: demo02 playwright tests
 on:
   push:
-    # branches: [main]
-    paths:
-      - 'apps/demo02-presence/**'
+    branches: [main]
+    # paths:
+    #   - 'apps/demo02-presence/**'
   pull_request:
-    # branches: [main]
-    paths:
-      - 'apps/demo02-presence/**'
+    branches: [main]
+    # paths:
+    #   - 'apps/demo02-presence/**'
 jobs:
   test:
     timeout-minutes: 60
