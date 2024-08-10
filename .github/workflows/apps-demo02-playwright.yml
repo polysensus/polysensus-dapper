@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: pnpm -F ${PNPM_WORKSPACE} install
       - name: Install Playwright Browsers
-        run: pnpm dlx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
         working-directory: ${{ env.WORKSPACE_PATH }}
       - name: Build the app
         run: pnpm -F ${PNPM_WORKSPACE} run build
