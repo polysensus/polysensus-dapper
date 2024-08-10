@@ -8,6 +8,7 @@ export * from './setprovider';
 export * from './providercontext.ts';
 export * from './presence.ts';
 export * from './supportedproviders';
+export * from './providertypes';
 
 /*
 export * from './provider.js';
