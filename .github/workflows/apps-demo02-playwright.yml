@@ -8,30 +8,39 @@ on:
     branches: [main]
     # paths:
     #   - 'apps/demo02-presence/**'
+
+env:
+  PNPM_WORKSPACE: 'demo02-presence'
+  WORKSPACE_PATH: 'apps/demo02-presence'
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/demo02-presence
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
           version: 9.5
+
+      - name: Cache pnpm store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       - uses: actions/setup-node@v4
         with:
           node-version: 18
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm -F ${PNPM_WORKSPACE} install
       - name: Install Playwright Browsers
-        run: pnpm dlx playwright install --with-deps
+        run: pnpm  -F ${PNPM_WORKSPACE} dlx playwright install --with-deps
       - name: Run Playwright tests
-        run: pnpm run test:integration
+        run: pnpm -F ${PNPM_WORKSPACE} run test:integration
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+          name: demo02-presence-playwright-report
+          path: apps/demo02-presence/playwright-report/
+          retention-days: 10
