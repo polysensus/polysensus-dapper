@@ -1,7 +1,7 @@
 name: 'Storybook Tests'
 on: push
 env:
-  PNPM_WORKSPACE: 'chainpresence'
+  WORKSPACE: 'chainpresence'
   WORKSPACE_PATH: 'packages/chainpresence'
 
 jobs:
@@ -27,16 +27,16 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: pnpm -F ${PNPM_WORKSPACE} install
+        run: pnpm -F ${WORKSPACE} install
 
       - name: Install Playwright
         run: pnpm exec playwright install --with-deps
         working-directory: ${{ env.WORKSPACE_PATH }}
 
       - name: Build Storybook
-        run: pnpm build-storybook --quiet
+        run: pnpm -F ${WORKSPACE} build-storybook --quiet
       - name: Serve Storybook and run tests
         run: |
-          pnpm dlx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-            "pnpm http-server storybook-static --port 6006 --silent" \
-            "pnpm wait-on tcp:127.0.0.1:6006 && pnpm test-storybook"
+          pnpm -F ${WORKSPACE} concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "pnpm -F ${WORKSPACE} http-server storybook-static --port 6006 --silent" \
+            "pnpm  -F ${WORKSPACE} wait-on tcp:127.0.0.1:6006 && pnpm -F ${WORKSPACE} test-storybook"
