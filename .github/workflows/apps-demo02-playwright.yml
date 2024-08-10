@@ -1,28 +1,31 @@
 name: demo02 playwright tests
 on:
   push:
-    branches: [main]
+    # branches: [main]
     paths:
-      - "apps/demo02-presence/**"
+      - 'apps/demo02-presence/**'
   pull_request:
-    branches: [main]
+    # branches: [main]
     paths:
-      - "apps/demo02-presence/**"
+      - 'apps/demo02-presence/**'
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/demo02-presence
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 18
       - name: Install dependencies
-        run: npm ci
+        run: pnpm ci
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: pnpm dlx playwright install --with-deps
       - name: Run Playwright tests
-        run: npx playwright test
+        run: pnpm run test:integration
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
