@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { popup, PopupSettings } from '@skeletonlabs/skeleton';
+	import { popup } from '@skeletonlabs/skeleton';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
 
 	type ConfigLike = {
@@ -23,6 +24,7 @@
 
 	let btnClass = undefined;
 	let lastName = undefined;
+	let popupOpen = false;
 
 	$: btnClass = selected?.name ? btnSelectedStyle : btnStyle;
 
@@ -31,12 +33,15 @@
 		event: 'click',
 		target: 'popupCombobox',
 		placement: 'bottom',
-		closeQuery: '.listbox-item'
+		closeQuery: '.listbox-item',
+		state: (event) => {
+			popupOpen = event.state;
+		}
 	};
 
 	function onClick<T extends ConfigLike>(event: MouseEvent, item: T) {
 		lastName = item?.name;
-		dispatch('providerSelected', item);
+		dispatch('onProviderSelected', item);
 	}
 </script>
 
@@ -53,7 +58,7 @@
 </button>
 
 <div class={cardStyle} data-popup="popupCombobox">
-	{#if configs}
+	{#if configs && popupOpen}
 		<ListBox rounded="rounded-none">
 			{#each configs as item}
 				<ListBoxItem
