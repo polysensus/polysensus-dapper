@@ -14,6 +14,8 @@
 	export let configs: ConfigLike[] = [];
 	export let selected: ConfigLike | undefined = undefined;
 
+	export let unselectedText: string = 'Choose';
+
 	// style props
 	export let btnStyle = 'btn variant-filled w-48 justify-between';
 	export let btnSelectedStyle = 'btn variant-ghost w-48 justify-between';
@@ -50,7 +52,7 @@
 		{#if selected?.id}
 			<span class={btnBadgeStyle}>{selected?.id}</span>
 		{/if}
-		<span class="px-1.5 capitalize">{selected?.name ?? 'Connect'}</span>
+		<span class="px-1.5 capitalize">{selected?.name ?? unselectedText}</span>
 		{#if configs}
 			<span>↓</span>
 		{/if}

@@ -183,6 +183,9 @@ importers:
       '@polysensus-dapper/chainpresence':
         specifier: workspace:^
         version: link:../../packages/chainpresence
+      '@web3auth/base':
+        specifier: ^8.3.0
+        version: 8.12.0(@babel/runtime@7.25.0)
     devDependencies:
       '@playwright/test':
         specifier: ^1.28.1
@@ -253,6 +256,9 @@ importers:
       vite:
         specifier: ^5.0.3
         version: 5.3.4(@types/node@20.14.11)
+      vite-plugin-node-polyfills:
+        specifier: ^0.21.0
+        version: 0.21.0(rollup@4.19.0)(vite@5.3.4(@types/node@20.14.11))
       vitest:
         specifier: ^2.0.0
         version: 2.0.5(@types/node@20.14.11)
@@ -262,6 +268,15 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.6.4
         version: 1.6.8
+      '@toruslabs/openlogin-utils':
+        specifier: ^8.2.1
+        version: 8.2.1(@babel/runtime@7.25.0)
+      '@web3auth/base':
+        specifier: ^8.3.0
+        version: 8.12.0(@babel/runtime@7.25.0)
+      '@web3auth/modal':
+        specifier: ^8.3.0
+        version: 8.12.0(@babel/runtime@7.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.4.39)
@@ -11318,7 +11333,7 @@ snapshots:
   create-ecdh@4.0.4:
     dependencies:
       bn.js: 4.12.0
-      elliptic: 6.5.4
+      elliptic: 6.5.6
 
   create-hash@1.2.0:
     dependencies:
