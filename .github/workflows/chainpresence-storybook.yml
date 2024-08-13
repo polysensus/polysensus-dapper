@@ -37,6 +37,6 @@ jobs:
         run: pnpm -F ${WORKSPACE} build-storybook --quiet
       - name: Serve Storybook and run tests
         run: |
-          pnpm -F ${WORKSPACE} concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-            "pnpm -F ${WORKSPACE} http-server storybook-static --port 6006 --silent" \
-            "pnpm  -F ${WORKSPACE} wait-on tcp:127.0.0.1:6006 && pnpm -F ${WORKSPACE} test-storybook"
+          pnpm -F ${WORKSPACE} exec concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "pnpm -F ${WORKSPACE} exec http-server storybook-static --port 6006 --silent" \
+            "pnpm  -F ${WORKSPACE} exec wait-on tcp:127.0.0.1:6006 && pnpm -F ${WORKSPACE} exec test-storybook"

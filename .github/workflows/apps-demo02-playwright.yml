@@ -10,7 +10,7 @@ on:
     #   - 'apps/demo02-presence/**'
 
 env:
-  PNPM_WORKSPACE: 'demo02-presence'
+  WORKSPACE: 'demo02-presence'
   WORKSPACE_PATH: 'apps/demo02-presence'
 jobs:
   test:
@@ -33,15 +33,15 @@ jobs:
         with:
           node-version: 18
       - name: Install dependencies
-        run: pnpm -F ${PNPM_WORKSPACE} install
+        run: pnpm -F ${WORKSPACE} install
       - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps
+        run: pnpm -F ${WORKSPACE} exec playwright install --with-deps
         working-directory: ${{ env.WORKSPACE_PATH }}
       - name: Build the app
-        run: pnpm -F ${PNPM_WORKSPACE} run build
+        run: pnpm -F ${WORKSPACE} run build
 
       - name: Run Playwright tests
-        run: pnpm -F ${PNPM_WORKSPACE} run test:integration
+        run: pnpm -F ${WORKSPACE} run test:integration
         # working-directory: ${{ env.WORKSPACE_PATH }}
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
