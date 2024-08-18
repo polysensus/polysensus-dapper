@@ -5,7 +5,7 @@ export type EnvConfigLike = {
 export function fromPrefixedEnv(prefix: string, env: EnvConfigLike): EnvConfigLike {
 	const cfg: EnvConfigLike = {};
 	for (const key in env) {
-		if (env.hasOwnProperty(key) && key.startsWith(prefix)) {
+		if (key.startsWith(prefix)) {
 			const configName = toTitleCase(key.slice(prefix.length));
 			cfg[configName] = env[key];
 		}
