@@ -34,6 +34,7 @@ jobs:
           node-version: 18
       - name: Build and Install dependencies
         run: |
+            pnpm -F chainpresence install
             pnpm -F chainpresence run build
             pnpm -F ${WORKSPACE} install
       - name: Build the app
