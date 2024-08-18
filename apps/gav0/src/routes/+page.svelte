@@ -22,6 +22,11 @@
 	import type { ChainAccessConfig } from '@polysensus-dapper/chainpresence';
 	import { ChainAccessConfigToWeb3Auth } from '@polysensus-dapper/chainpresence';
 	import type { Web3AuthAdapterConfig } from '@polysensus-dapper/chainpresence';
+	import type {
+		Web3AuthInfraConfig,
+		ZeroDevConfig,
+		AlchemyInfraConfig
+	} from '@polysensus-dapper/chainpresence';
 	// import type {ChainAccessConfig} from
 
 	/** @type {import(a'./$types).LayoutData}*/
@@ -39,6 +44,15 @@
 		console.log(`/+page.svelte# num chains ${data.chains.length}`);
 		await init();
 	});
+
+	function web3AuthConfig(
+		infra: (Web3AuthInfraConfig | ZeroDevConfig | AlchemyInfraConfig)[]
+	): Web3AuthInfraConfig {
+		for (const cfg of infra) {
+			if (cfg.id === 'web3auth') return cfg;
+		}
+		throw new Error(`web3auth infra not configured`);
+	}
 
 	function defaultChainByName(chains: ChainAccessConfig[], preferred: string[]): ChainAccessConfig {
 		let best: number = Number.MAX_SAFE_INTEGER;
@@ -74,21 +88,23 @@
 				defaultChainByName(data.chains, ['ethereum_default', 'etherumholesky_default'])
 			);
 
-			console.log(`chainConfig# ${JSON.stringify(chainConfig, null, ' ')}`);
+			//console.log(`chainConfig# ${JSON.stringify(chainConfig, null, ' ')}`);
 
 			const privateKeyProvider = new EthereumPrivateKeyProvider({
 				config: { chainConfig }
 			});
 
+			const web3cfg: Web3AuthInfraConfig = web3AuthConfig(data.infra);
+
 			web3auth = new Web3AuthNoModal({
-				clientId,
+				clientId: web3cfg.options.clientId,
 				// XXX: web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
-				web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
+				web3AuthNetwork: web3cfg.options.web3AuthNetwork, // .WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
 				privateKeyProvider
 			});
 
 			const adapterConfig = defaultAdapter(data.adapters);
-			console.log(`openloginAdapter: ${JSON.stringify(adapterConfig, null, ' ')}`);
+			// console.log(`openloginAdapter: ${JSON.stringify(adapterConfig, null, ' ')}`);
 			const openloginAdapter = new OpenloginAdapter(adapterConfig);
 			web3auth.configureAdapter(openloginAdapter);
 
@@ -108,9 +124,9 @@
 			return;
 		}
 		const loginProvider = defaultAdapterLoginProvider(data.adapters);
-		console.log(
-			`loginProvider# ${JSON.stringify(loginProvider)} OPENLOGIN ${WALLET_ADAPTERS.OPENLOGIN}`
-		);
+		// console.log(
+		// 	`loginProvider# ${JSON.stringify(loginProvider)} OPENLOGIN ${WALLET_ADAPTERS.OPENLOGIN}`
+		// );
 		const web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, loginProvider);
 		provider = web3authProvider;
 	};
@@ -201,7 +217,9 @@
 		}
 		const rpc = new RPC(provider);
 		const privateKey = await rpc.getPrivateKey();
-		uiConsole(privateKey);
+		uiConsole(
+			'your private key is available to the browser environment, copying it or displaying it is not supported'
+		);
 	};
 </script>
 
@@ -214,7 +232,7 @@
   </ul>
 -->
 
-	<div class="card p-4">
+	<div class="container h-full mx-auto flex justify-center items-center">
 		<div>
 			<button on:click={() => getUserInfo()} type="button" class="btn variant-filled"
 				>Get User Info</button
@@ -262,12 +280,14 @@
 		</div>
 	</div>
 {:else}
-	<div>
+	<div class="container h-full mx-auto flex justify-center items-center">
 		<button on:click={() => login()} type="button" class="btn variant-filled"> Log In </button>
 	</div>
 {/if}
-<div id="console" style={{ whiteSpace: 'pre-line' }}>
-	<p style={{ whiteSpace: 'pre-line' }}>Logged in Successfully!</p>
+<div class="container h-full mx-auto flex justify-center items-center">
+	<div id="console" style={{ whiteSpace: 'pre-line' }}>
+		<p style={{ whiteSpace: 'pre-line' }}>Logged in Successfully!</p>
+	</div>
 </div>
 
 <!--

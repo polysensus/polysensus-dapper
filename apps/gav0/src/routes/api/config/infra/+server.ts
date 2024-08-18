@@ -2,11 +2,9 @@ import * as env from '$env/static/public';
 import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '$lib/server/request';
 
-const defaults = 'openlogin';
+const defaults = 'web3auth';
 
 export const GET: RequestHandler = () => {
-	const chainNames: string[] = (
-		env['PUBLIC_API_CONFIG_WEB3AUTH_ADAPTER_ADAPTERS'] ?? defaults
-	).split(',');
-	return json(chainNames);
+	const names: string[] = (env['PUBLIC_API_CONFIG_INFRA_PROVIDERS'] ?? defaults).split(',');
+	return json(names);
 };
