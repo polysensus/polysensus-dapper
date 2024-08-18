@@ -1,16 +1,14 @@
-import type { Web3AuthnOptions } from './web3auth.js';
-import type { ZeroDevConfig } from './zerodev.js';
-import type { AlchemyInfraConfig } from './alchemy.js';
+import type { ChainAccessConfig } from './chainaccessconfig.js';
 import type { FetchFunctionLike } from '../fetchfunction.js';
 
-export async function fetchInfraConfigs(
+export async function fetchChainAccessConfigs(
 	fetch: FetchFunctionLike,
 	configs: string[]
-): Promise<(Web3AuthnOptions | ZeroDevConfig | AlchemyInfraConfig)[]> {
+): Promise<ChainAccessConfig[]> {
 	try {
 		// Map over the configs array to create an array of fetch Promises
 		const fetchPromises = configs.map((path) =>
-			fetch(path).then((response) => {
+			fetch(path).then((response: Response) => {
 				if (!response.ok) {
 					throw new Error(`Failed to fetch ${path}: ${response.statusText}`);
 				}

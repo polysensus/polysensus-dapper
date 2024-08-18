@@ -1,0 +1,19 @@
+---
+version: "3"
+includes:
+  build:
+    taskfile: ./taskfiles/Taskfile_build.yml
+    vars:
+      PROVIDER_ID: "opsepolia"
+
+tasks:
+  build:
+    desc: "build everything"
+    cmds:
+      - task: build:gav0
+
+  build:gav0:
+    desc: "build everything for gav0"
+    cmds:
+      - task: build:package:chainpresence
+      - task: build:app:gav0

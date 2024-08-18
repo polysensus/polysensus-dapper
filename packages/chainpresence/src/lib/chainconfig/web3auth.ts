@@ -3,7 +3,7 @@ import type { BaseAdapterSettings } from '@web3auth/base';
 import type { IWeb3AuthCoreOptions } from '@web3auth/base';
 
 // import type { Web3AuthOptions } from '@web3auth/modal';
-import type { ChainInfraConfig } from './chainconfig.js';
+import type { ChainInfraConfig } from './infraconfig.js';
 // import { BaseRedirectParams, LoginParams, OpenLoginOptions } from '@toruslabs/openlogin-utils';
 import type { OpenLoginOptions } from '@toruslabs/openlogin-utils';
 

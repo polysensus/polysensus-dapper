@@ -78,8 +78,11 @@
 		"@floating-ui/dom": "^1.6.4",
 		"@toruslabs/openlogin-utils": "^8.2.1",
 		"@web3auth/base": "^8.3.0",
+		"@web3auth/metamask-adapter": "^8.4.0",
 		"@web3auth/modal": "^8.3.0",
+		"@web3auth/openlogin-adapter": "^8.12.2",
 		"autoprefixer": "^10.4.20",
+		"lodash.merge": "^4.6.2",
 		"postcss": "^8.4.32",
 		"tailwindcss": "^3.4.9"
 	},

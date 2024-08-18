@@ -1,0 +1,20 @@
+---
+version: "3"
+
+tasks:
+  package:chainpresence:
+    cmds:
+      - task: workspace
+        vars: { WORKSPACE: "chainpresence" }
+
+  app:gav0:
+    cmds:
+      - task: workspace
+        vars: { WORKSPACE: "gav0" }
+
+  workspace:
+    vars:
+      WORKSPACE: "{{.WORKSPACE}}"
+    cmds:
+      - echo "-F {{.WORKSPACE}}"
+      - pnpm -F {{.WORKSPACE}} run build

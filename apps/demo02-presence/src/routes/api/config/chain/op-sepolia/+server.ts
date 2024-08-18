@@ -18,7 +18,7 @@ export const GET: RequestHandler = () => {
 		polling: env['PUBLIC_API_CONFIG_CHAIN_OP_SEPOLIA_POLLING'] ?? 2000,
 		ticker: env['PUBLIC_API_CONFIG_CHAIN_OP_SEPOLIA_TICKER'] ?? 'ETH'
 	};
-	const decimals = Number(env['PUBLIC_API_CONFIG_CHAIN_OP_SEPOLIA_EXPLORER_URL']);
+	const decimals = Number(env['PUBLIC_API_CONFIG_CHAIN_OP_SEPOLIA_DECIMALS']);
 	if (!isNaN(decimals)) cfg.decimals = decimals;
 
 	// if there is a url in secrets use that, as it will have the api key embeded
