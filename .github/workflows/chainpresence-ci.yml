@@ -1,0 +1,33 @@
+name: 'Unit Tests'
+on: push
+env:
+  WORKSPACE: 'chainpresence'
+  WORKSPACE_PATH: 'packages/chainpresence'
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.5
+
+      - name: Cache pnpm store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: pnpm -F ${WORKSPACE} install
+
+      - name: Test
+        run: pnpm -F ${WORKSPACE} test:unit
