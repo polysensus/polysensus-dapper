@@ -1,4 +1,4 @@
-name: demo02 playwright tests
+name: gav0 playwright tests
 on:
   push:
     branches: [main]
@@ -34,9 +34,9 @@ jobs:
           node-version: 18
       - name: Build and Install dependencies
         run: |
-            pnpm -F chainpresence install
-            pnpm -F chainpresence run build
-            pnpm -F ${WORKSPACE} install
+          pnpm -F chainpresence install
+          pnpm -F chainpresence run build
+          pnpm -F ${WORKSPACE} install
       - name: Build the app
         run: pnpm -F ${WORKSPACE} run build
       - name: Install Playwright Browsers
