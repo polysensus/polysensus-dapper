@@ -19,7 +19,17 @@
 	// Floating UI for Popups
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
+
+	import GAVBar from '$lib/components/organisms/GAVBar.svelte';
+	import GAVPresence from '$lib/components/organisms/GAVPresence.svelte';
+
+	/** @type {import('./$types).LayoutData}*/
+	export let data;
+
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 </script>
 
+<GAVBar>
+	<GAVPresence data={data} />
+</GAVBar>
 <slot />
