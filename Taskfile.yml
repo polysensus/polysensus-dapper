@@ -3,8 +3,12 @@ version: "3"
 includes:
   build:
     taskfile: ./taskfiles/Taskfile_build.yml
+  storybook:chainpresence:
+    taskfile: ./taskfiles/Taskfile_storybook.yml
+    aliases: [sb:chainpresence]
     vars:
-      PROVIDER_ID: "opsepolia"
+      WORKSPACE: "chainpresence"
+  
 
 tasks:
   build:

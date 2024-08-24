@@ -1,0 +1,29 @@
+---
+version: "3"
+
+vars:
+  WORKSPACE: "{{.WORKSPACE}}"
+
+tasks:
+  run:
+    desc: "run storbook in  {{.WORKSPACE}}"
+    vars:
+      WORKSPACE: "{{.WORKSPACE}}"
+    cmds:
+      - pnpm -F {{.WORKSPACE}} run storybook
+
+  build:
+    desc: "build storbook in  {{.WORKSPACE}}"
+    vars:
+      WORKSPACE: "{{.WORKSPACE}}"
+    cmds:
+      - pnpm -F {{.WORKSPACE}} build-storybook --quiet
+
+  test:
+    desc: "run storbook tests in  {{.WORKSPACE}}"
+    vars:
+      WORKSPACE: "{{.WORKSPACE}}"
+    cmds:
+      - pnpm -F {{.WORKSPACE}} exec concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+        "pnpm -F {{.WORKSPACE}} exec http-server storybook-static --port 6006 --silent" \
+        "pnpm  -F {{.WORKSPACE}} exec wait-on tcp:127.0.0.1:6006 && pnpm -F {{.WORKSPACE}} exec test-storybook"
