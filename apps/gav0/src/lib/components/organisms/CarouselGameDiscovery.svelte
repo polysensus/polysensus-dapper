@@ -16,7 +16,7 @@
 		perMove: 1,
 		gap: '1rem',
 		pagination: false,
-		height: '30rem'
+		height: '21rem'
 	};
 
 	const thumbsOptions = {
@@ -29,7 +29,7 @@
 		cover: true,
 		focus: 'center' as const,
 		isNavigation: true,
-		updateOnMove: true
+		updateOnMove: true,
 	};
 
 	onMount(() => {
@@ -39,7 +39,7 @@
 	});
 </script>
 
-<div class="wrapper splide-wrapper">
+<div class="wrapper">
 	<Splide
 		on:moved
 		options={mainOptions}

@@ -40,10 +40,14 @@
 	// --- component helpers
 </script>
 
-<div class="flex justify-between gap-4">
+<div class="flex flex-col md:flex-row justify-between gap-4">
 	{#if selected}
+  <div class="mb-4 md:mb-0">
 		<CardGameTeaserAbout game={teaser} />
+</div>
+<div class="mb-4 md:mb-0">
 		<CardGameTeaserHowWeHelp game={augmentation} />
+</div>
 		<CardGameTeaserLaunchPad game={launchPad} />
 	{/if}
 </div>
