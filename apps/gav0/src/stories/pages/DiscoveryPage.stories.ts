@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/svelte';
 // import DiscoveryPage from '../../components/pages/DiscoveryPage.svelte';
 import DiscoveryPage from '$lib/components/pages/DiscoveryPage.svelte';
 
+import { singleGameSelector as selector } from '$lib/placeholders/gamediscoveryselectors';
+
 const meta = {
 	title: 'Pages/DiscoveryPage',
 	component: DiscoveryPage,

@@ -1,7 +1,8 @@
 <script lang="ts">
+	// --- lib deps
+
 	import { Splide, SplideSlide } from '@splidejs/svelte-splide';
 	import { onMount } from 'svelte';
-	import { randomImages } from '../../utils';
 
 	let main: Splide;
 	let thumbs: SplideSlide;
@@ -38,8 +39,13 @@
 	});
 </script>
 
-<div class="wrapper">
-	<Splide options={mainOptions} bind:this={main} aria-labelledby="thumbnails-example-heading">
+<div class="wrapper splide-wrapper">
+	<Splide
+		on:moved
+		options={mainOptions}
+		bind:this={main}
+		aria-labelledby="thumbnails-example-heading"
+	>
 		{#each slides as slide}
 			<SplideSlide>
 				<img src={slide.src} alt={slide.alt} />
@@ -47,7 +53,7 @@
 		{/each}
 	</Splide>
 
-	<Splide options={thumbsOptions} bind:this={thumbs}>
+	<Splide on:moved options={thumbsOptions} bind:this={thumbs}>
 		{#each slides as slide}
 			<SplideSlide>
 				<img src={slide.src} alt={slide.alt} />
@@ -55,3 +61,11 @@
 		{/each}
 	</Splide>
 </div>
+
+<style>
+	.splide-wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem; /* Adjust the value as needed */
+	}
+</style>
