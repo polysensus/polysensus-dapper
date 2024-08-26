@@ -8,6 +8,7 @@ export class GameDiscoverySelector {
 	_teasers: { [key: string]: GameTeaserAboutContent } = {};
 	_augmentations: { [key: string]: GameTeaserHowWeHelpContent } = {};
 	_launchPads: { [key: string]: GameTeaserLaunchPadContent } = {};
+  _indices: {[key:number]: string} = {}
 	selected?: string;
 
 	get teasers(): GameTeaserAboutContent[] {
@@ -57,8 +58,19 @@ export class GameDiscoverySelector {
 			this._launchPads[game.launchPad.gameId] = game.launchPad;
 		});
 
+    this.teasers.forEach((value, index)=>{
+      this._indices[index] = value.id
+    })
+
 		if (Object.values(this._teasers).length > 0) this.selected = this.teasers[0].id;
 	}
+
+  /** return the id for the index. The index is according to the lexical sort order of the ids,
+   * so this.teasers[0].id == this._indices[0]
+   */
+  idOf(index: number): string {
+    return this._indices[index];
+  }
 
 	select(id: string) {
 		if (!(id in this._teasers)) throw new Error(`id ${id} not found in teasers`);

@@ -42,13 +42,15 @@
 
 <div class="flex flex-col md:flex-row justify-between gap-4">
 	{#if selected}
-  <div class="mb-4 md:mb-0">
+  <div class="mb-4 md:mb-0 flex-1 max-w-1/3">
 		<CardGameTeaserAbout game={teaser} />
-</div>
-<div class="mb-4 md:mb-0">
-		<CardGameTeaserHowWeHelp game={augmentation} />
-</div>
+  </div>
+  <div class="mb-4 md:mb-0 flex-1">
+  	<CardGameTeaserHowWeHelp game={augmentation} />
+  </div>
+  <div class="flex-1">
 		<CardGameTeaserLaunchPad game={launchPad} />
+  </div>
 	{/if}
 </div>
 

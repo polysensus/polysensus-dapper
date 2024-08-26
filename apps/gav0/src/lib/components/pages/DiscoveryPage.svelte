@@ -1,8 +1,9 @@
 <script lang="ts">
 	// --- lib deps
 	import { sixGameSelector as selector } from '$lib/placeholders/gamediscoveryselectors';
+	import type { GameTeaserAboutContent } from '$lib/models/components';
 	// --- framework
-	// import { onMount , setContext, getContext, onDestroy } from 'svelte'
+	import { onMount, setContext, getContext, onDestroy } from 'svelte';
 	// --- external components
 	// --- components
 
@@ -12,13 +13,17 @@
 	// import ThumbnailsExample from '$lib/components/examples/ThumbnailsExample.svelte';
 
 	// --- app lib
-	import { randomImages } from '$lib/utils';
 	// --- app stores
 	// --- constants
 	// --- data imports
 	// --- component properties
-	let slides: { src: string; alt: string }[] = randomImages('teasers', 6);
-	let selected = 'game-2';
+	let slides: { src: string; alt: string }[] = selector.teasers.map((about) => ({
+		src: about.imageUrl,
+		alt: about.title
+	}));
+	let selected = selector.idOf(0);
+	// let selected = 'shrapnel-2024';
+
 	// --- component state properties
 	// --- svelte bound variables
 	// let instance = undefined
@@ -28,10 +33,14 @@
 	// --- on event callbacks
 	function onSliderMoved(event) {
 		console.log('slider moved', event.detail);
-		selected = `game-${event.detail.index + 1}`;
-    selector.select(selected);
+		selected = selector.idOf(event.detail.index);
+
+		selector.select(selected);
 	}
 	// --- contract state callbacks
+	onMount(() => {
+		selector.select(selected);
+	});
 	// --- component helpers
 </script>
 

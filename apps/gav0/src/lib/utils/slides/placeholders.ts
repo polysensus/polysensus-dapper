@@ -10,13 +10,13 @@ import teaserspacestrategy0 from '$lib/assets/midjourney/teaser-space-strategy-0
 export const placeholders = {
 	teasers: [
 		teaserfps0,
-		teaserfps1,
 		teaserracefun0,
+		teaserspacestrategy0,
+		teaserskate0,
 		teaserracefun1,
+		teaserfps1,
 		teaserracefun2,
 		teaserseabattle0,
-		teaserskate0,
-		teaserspacestrategy0
 	]
 };
 

@@ -28,7 +28,7 @@
 	// --- component helpers
 </script>
 
-<div class="card rounded-none">
+<div class="card rounded-none max-w-1/3">
 	{#if game}
 		<header class="card-header">
 			<h2 class="card-header-title">About</h2>

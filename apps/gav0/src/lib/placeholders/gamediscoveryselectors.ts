@@ -3,15 +3,23 @@ import type {
 	GameTeaserHelperContent,
 	GameTeaserHowWeHelpContent,
 	GameTeaserLaunchPadLauncherContent,
-	GameTeaserLaunchPadContent
+	GameTeaserLaunchPadContent,
+	GameTeaserAboutContent
 } from '$lib/models/components';
 
-export function aboutByNumber(id: number) {
+import { placeholders, randomImages } from '$lib/utils/slides/placeholders';
+import shrapnel2024 from '$lib/assets/midjourney/shrapnel-2024.png';
+
+export const shrapnelId = `0-shrapnel-2024`;
+
+export function aboutByNumber(id: number): GameTeaserAboutContent {
 	return {
 		id: `game-${id}`,
 		title: `Game ${id}`,
 		logLine: `Log Line for Game ${id}`,
-		blurb: `Lorem ipsum dolor sit amet, consectetur adipiscing elit`
+		blurb: `Lorem ipsum dolor sit amet, consectetur adipiscing elit`,
+		imageUrl:
+			placeholders.teasers.length > id ? placeholders.teasers[id] : randomImages('teasers', 1)
 	};
 }
 
@@ -38,7 +46,12 @@ export function howWeHelpByNumber(
 	};
 }
 
-export function launchPadByNumber(id: number, launcherCount: number): GameTeaserLaunchPadContent {
+export function launchPadById(
+	id: number | string,
+	launcherCount: number
+): GameTeaserLaunchPadContent {
+	id = typeof id === 'string' ? id : `game-${id}`;
+
 	const launchers: GameTeaserLaunchPadLauncherContent[] = [];
 	for (let i = 0; i < launcherCount; i++) {
 		if (!launchersById[`launcher-${i + 1}`]) {
@@ -48,8 +61,8 @@ export function launchPadByNumber(id: number, launcherCount: number): GameTeaser
 	}
 
 	return {
-		id: `game-${id}-launch-pad`,
-		gameId: `game-${id}`,
+		id: `${id}-launch-pad`,
+		gameId: `${id}`,
 		logLine: `Log Line for Game ${id} Launch Pad`,
 		blurb: `Lorem ipsum dolor sit amet, consectetur adipiscing elit`,
 		launchers
@@ -95,39 +108,75 @@ export const singleGameSelector: GameDiscoverySelector = new GameDiscoverySelect
 	{
 		about: aboutByNumber(1),
 		howWeHelp: howWeHelpByNumber(1, ['Cool thing 1', 'Fancy thing 2', 'Awesome thing 3']),
-		launchPad: launchPadByNumber(1, 4)
+		launchPad: launchPadById(1, 4)
 	}
 ]);
 
 export const sixGameSelector: GameDiscoverySelector = new GameDiscoverySelector([
 	{
-		about: aboutByNumber(1),
-		howWeHelp: howWeHelpByNumber(1, ['Cool thing 1', 'Fancy thing 2', 'Awesome thing 3']),
-		launchPad: launchPadByNumber(1, 4)
+		about: {
+			id: shrapnelId,
+			logLine: 'Can you survive this high-stakes extraction challenge?',
+			title: 'Shrapnel',
+			imageUrl: shrapnel2024,
+			blurb: `
+It’s 2038. An asteroid collides with the moon. Lunar meteorites bombard a 500km
+radius on  Earth.  This Sacrifice Zone is permanently evacuated and guarded by
+paramilitary.  Until shrapnel from the meteor, full of  valuable resources, is
+discovered in the Sacrifice Zone. Guards become mercenaries, risking their lives
+to extract the valuable shrapnel from the Zone. 
+
+Can you survive this high-stakes extraction challenge?`
+		},
+		howWeHelp: {
+			id: `${shrapnelId}-augmentation`,
+			gameId: shrapnelId,
+			logLine: 'Power up your extraction team',
+			blurb: 'Map and cosmentics creators, brag panel for your home page',
+			helpers: [
+				{
+					id: `helper-${shrapnelId}-0`,
+					name: 'Map and cosmetics creator',
+					description:
+						'Create your own maps and cosmetics to survive the Shrapnel extraction challenge'
+				},
+				{
+					id: `helper-${shrapnelId}-1`,
+					name: 'Brag list',
+					description: 'Show off your extracted shrapnel and creations on your player page'
+				},
+				{
+					id: `helper-${shrapnelId}-2`,
+					name: 'Graffiti',
+					description: 'Leave your mark on a valuable piece of shrapnel. Post-apocalyptic graffiti'
+				}
+			]
+		},
+		launchPad: launchPadById(shrapnelId, 4)
 	},
 	{
 		about: aboutByNumber(2),
 		howWeHelp: howWeHelpByNumber(2, ['Awesome thing', 'Unusual thing']),
-		launchPad: launchPadByNumber(2, 4)
+		launchPad: launchPadById(2, 4)
 	},
 	{
 		about: aboutByNumber(3),
 		howWeHelp: howWeHelpByNumber(3, ['Cool thing1', 'Fancy thing', 'Surprising thing']),
-		launchPad: launchPadByNumber(3, 4)
+		launchPad: launchPadById(3, 4)
 	},
 	{
 		about: aboutByNumber(4),
 		howWeHelp: howWeHelpByNumber(4, ['Cool thing 1', 'Fancy thing 2', 'Awesome thing 3']),
-		launchPad: launchPadByNumber(4, 4)
+		launchPad: launchPadById(4, 4)
 	},
 	{
 		about: aboutByNumber(5),
 		howWeHelp: howWeHelpByNumber(5, ['Cool thing 1', 'Fancy thing 2', 'Awesome thing 3']),
-		launchPad: launchPadByNumber(5, 4)
+		launchPad: launchPadById(5, 4)
 	},
 	{
 		about: aboutByNumber(6),
 		howWeHelp: howWeHelpByNumber(6, ['Cool thing 1', 'Fancy thing 2', 'Awesome thing 3']),
-		launchPad: launchPadByNumber(6, 4)
+		launchPad: launchPadById(6, 4)
 	}
 ]);

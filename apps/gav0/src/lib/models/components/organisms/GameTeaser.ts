@@ -3,6 +3,7 @@ export type GameTeaserAboutContent = {
 	title: string;
 	logLine: string;
 	blurb: string;
+  imageUrl: string;
 };
 
 export type GameTeaserHelperContent = {

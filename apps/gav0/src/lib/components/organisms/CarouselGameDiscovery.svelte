@@ -16,7 +16,7 @@
 		perMove: 1,
 		gap: '1rem',
 		pagination: false,
-		height: '21rem'
+		height: '30rem'
 	};
 
 	const thumbsOptions = {
