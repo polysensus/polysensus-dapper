@@ -5,42 +5,43 @@ import type { GameTeaserHowWeHelpContent } from '$lib/models/components';
 import type { GameTeaserLaunchPadContent } from '$lib/models/components';
 
 export class GameDiscoverySelector {
-	_teasers: { [key: string]: GameTeaserAboutContent } = {};
-	_augmentations: { [key: string]: GameTeaserHowWeHelpContent } = {};
-	_launchPads: { [key: string]: GameTeaserLaunchPadContent } = {};
-  _indices: {[key:number]: string} = {}
+  _games: {
+    about: GameTeaserAboutContent,
+    howWeHelp: GameTeaserHowWeHelpContent,
+    launchPad: GameTeaserLaunchPadContent}[] = [];
+	_index: { [key: string]: number } = {};
 	selected?: string;
 
 	get teasers(): GameTeaserAboutContent[] {
-		return Object.values(this._teasers).sort((a, b) => a.id.localeCompare(b.id));
+		return this._games.map((game) => game.about);
 	}
 
+  /** gameId's returns the id's assigned to the about instances in order of their original indices (determined by order of addition) */
 	get gameIds(): string[] {
-		return Object.keys(this._teasers).sort((a, b) => a.localeCompare(b));
+		return this._games.map((game) => game.about.id);
 	}
 
 	get augmentations(): GameTeaserHowWeHelpContent[] {
-		return Object.values(this._augmentations).sort((a, b) => a.gameId.localeCompare(b.gameId));
+		return this._games.map((game) => game.howWeHelp);
 	}
 
 	get launchPads(): GameTeaserLaunchPadContent[] {
-		return Object.values(this._launchPads).sort((a, b) => a.gameId.localeCompare(b.gameId));
+		return this._games.map((game) => game.launchPad);
 	}
 
 	get teaser(): GameTeaserAboutContent {
-    console.log(this.selected);
 		if (!this.selected) throw new Error(`selected not set`);
-		return this._teasers[this.selected];
+    return this._games[this._index[this.selected]].about;
 	}
 
 	get augmentation(): GameTeaserHowWeHelpContent {
 		if (!this.selected) throw new Error(`selected not set`);
-		return this._augmentations[this.selected];
+    return this._games[this._index[this.selected]].howWeHelp;
 	}
 
 	get launchPad(): GameTeaserLaunchPadContent {
 		if (!this.selected) throw new Error(`selected not set`);
-		return this._launchPads[this.selected];
+    return this._games[this._index[this.selected]].launchPad;
 	}
 
 	constructor(
@@ -50,30 +51,23 @@ export class GameDiscoverySelector {
 			launchPad: GameTeaserLaunchPadContent;
 		}[]
 	) {
-		games.forEach((game) => {
-			if (game.about.id !== game.howWeHelp.gameId || game.about.id !== game.launchPad.gameId)
-				throw new Error(`game.about.id inconsistent with associated items`);
-			this._teasers[game.about.id] = game.about;
-			this._augmentations[game.howWeHelp.gameId] = game.howWeHelp;
-			this._launchPads[game.launchPad.gameId] = game.launchPad;
-		});
+    this._games = games;
+    this._games.forEach((game, index) => {
+      this._index[game.about.id] = index;
+    });
 
-    this.teasers.forEach((value, index)=>{
-      this._indices[index] = value.id
-    })
-
-		if (Object.values(this._teasers).length > 0) this.selected = this.teasers[0].id;
+		if (Object.values(this._games).length > 0) this.selected = this.teasers[0].id;
 	}
 
-  /** return the id for the index. The index is according to the lexical sort order of the ids,
-   * so this.teasers[0].id == this._indices[0]
-   */
-  idOf(index: number): string {
-    return this._indices[index];
-  }
+	/** return the id for the index. The index is according to the lexical sort order of the ids,
+	 * so this.teasers[0].id == this._indices[0]
+	 */
+	idOf(index: number): string {
+		return this._games[index].about.id;
+	}
 
 	select(id: string) {
-		if (!(id in this._teasers)) throw new Error(`id ${id} not found in teasers`);
+		if (!(id in this._index)) throw new Error(`id ${id} not found in index`);
 		this.selected = id;
 	}
 }

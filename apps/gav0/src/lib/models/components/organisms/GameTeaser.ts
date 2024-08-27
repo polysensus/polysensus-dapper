@@ -3,7 +3,7 @@ export type GameTeaserAboutContent = {
 	title: string;
 	logLine: string;
 	blurb: string;
-  imageUrl: string;
+	imageUrl: string;
 };
 
 export type GameTeaserHelperContent = {
@@ -14,7 +14,7 @@ export type GameTeaserHelperContent = {
 
 export type GameTeaserHowWeHelpContent = {
 	id: string;
-	gameId: string;
+  gameId: string;
 	logLine: string;
 	blurb: string;
 	helpers: GameTeaserHelperContent[];
@@ -25,13 +25,12 @@ export type GameTeaserLaunchPadLauncherContent = {
 	name: string;
 	iconName?: string;
 	description: string;
-  launchAction: string;
+	launchAction: string;
 	launchUrl?: string;
 };
 
 export type GameTeaserLaunchPadContent = {
 	id: string;
-	gameId: string;
 	logLine: string;
 	blurb: string;
 	launchers: GameTeaserLaunchPadLauncherContent[];

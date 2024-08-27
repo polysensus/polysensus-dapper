@@ -9,8 +9,14 @@ import type {
 
 import { placeholders, randomImages } from '$lib/utils/slides/placeholders';
 import shrapnel2024 from '$lib/assets/midjourney/shrapnel-2024.png';
+import biomesImgSrc from '$lib/assets/midjourney/teaser-biomes.jpg';
+import primodiumImgSrc from '$lib/assets/midjourney/teaser-primodium.jpg';
+import skystrifeImgSrc from '$lib/assets/midjourney/teaser-skystrife.jpg';
 
-export const shrapnelId = `0-shrapnel-2024`;
+export const shrapnelId = `shrapnel-2024`;
+export const biomesId = `biomes-2024`;
+export const primodiumId = `primodium-2024`;
+export const skystrifeId = `skystrife-2024`;
 
 export function aboutByNumber(id: number): GameTeaserAboutContent {
 	return {
@@ -19,13 +25,16 @@ export function aboutByNumber(id: number): GameTeaserAboutContent {
 		logLine: `Log Line for Game ${id}`,
 		blurb: `Lorem ipsum dolor sit amet, consectetur adipiscing elit`,
 		imageUrl:
-			placeholders.teasers.length > id ? placeholders.teasers[id] : randomImages('teasers', 1)
+			placeholders.teasers.length > id
+				? placeholders.teasers[id]
+				: randomImages('teasers', 1)[0].src
 	};
 }
 
 export function howWeHelpByNumber(
 	id: number,
-	helperDescriptions: string[]
+	helperDescriptions: string[],
+	gameId?: string
 ): GameTeaserHowWeHelpContent {
 	const helpers: GameTeaserHelperContent[] = helperDescriptions.map(
 		(helper, index): GameTeaserHelperContent => {
@@ -39,7 +48,7 @@ export function howWeHelpByNumber(
 
 	return {
 		id: `game-${id}-augmentation`,
-		gameId: `game-${id}`,
+		gameId: gameId ?? `game-${id}`,
 		logLine: `Log Line for Game ${id} Augmentation`,
 		helpers,
 		blurb: `Lorem ipsum dolor sit amet, consectetur adipiscing elit`
@@ -62,7 +71,6 @@ export function launchPadById(
 
 	return {
 		id: `${id}-launch-pad`,
-		gameId: `${id}`,
 		logLine: `Log Line for Game ${id} Launch Pad`,
 		blurb: `Lorem ipsum dolor sit amet, consectetur adipiscing elit`,
 		launchers
@@ -112,7 +120,7 @@ export const singleGameSelector: GameDiscoverySelector = new GameDiscoverySelect
 	}
 ]);
 
-export const sixGameSelector: GameDiscoverySelector = new GameDiscoverySelector([
+export const sevenGameSelector: GameDiscoverySelector = new GameDiscoverySelector([
 	{
 		about: {
 			id: shrapnelId,
@@ -155,20 +163,131 @@ Can you survive this high-stakes extraction challenge?`
 		launchPad: launchPadById(shrapnelId, 4)
 	},
 	{
-		about: aboutByNumber(2),
-		howWeHelp: howWeHelpByNumber(2, ['Awesome thing', 'Unusual thing']),
-		launchPad: launchPadById(2, 4)
+		about: {
+			id: biomesId,
+			logLine: 'What will your world look like?',
+			title: 'BIOMES',
+			imageUrl: biomesImgSrc,
+			blurb: `Wonder around, play mini-games, team up and craft your own experience in this
+MMORPG sandbox. Fish, craft, farm, create.
+
+Like Roblox or Minecraft, but with many more opportunities to create your own
+worlds and environment, and fewer rules.
+
+What will your world look like?`
+		},
+		howWeHelp: {
+			id: `${biomesId}-augmentation`,
+			gameId: biomesId,
+			logLine: 'Builder, on-board and LFG helpers',
+			blurb: 'Skip the invite codes, accelerate your world building and find your team',
+			helpers: [
+				{
+					id: `helper-${biomesId}-0`,
+					name: 'Blueprints fabricator',
+					description: 'Rapid, automatic, blueprint creation and experience deployment'
+				},
+				{
+					id: `helper-${biomesId}-1`,
+					name: 'Skip the invite codes',
+					description:
+						'Avoids the need for invite codes'
+				},
+				{
+					id: `helper-${biomesId}-2`,
+					name: 'Team beacon',
+					description: 'Incentivize team building and collaboration'
+				},
+			]
+		},
+		launchPad: launchPadById(biomesId, 3)
 	},
 	{
-		about: aboutByNumber(3),
-		howWeHelp: howWeHelpByNumber(3, ['Cool thing1', 'Fancy thing', 'Surprising thing']),
-		launchPad: launchPadById(3, 4)
+		about: {
+			id: primodiumId,
+			logLine: 'Gain control over the asteroid belt by building your industrial empire',
+			title: 'primodium',
+			imageUrl: primodiumImgSrc,
+			blurb: `
+Gain control over the asteroid belt by building your industrial empire and fleet
+to battle your enemies. Collect resources through mining, trading or raiding,
+transport and process them, construct your automated production line and even
+undertake research to upgrade your equipment, all in an attempt to increase your
+control over the asteroid belt.`
+		},
+		howWeHelp: {
+			id: `${primodiumId}-augmentation`,
+			gameId: primodiumId,
+			logLine: 'Builder, on-board and LFG helpers',
+			blurb: 'Generate industrial artifacts, show off your fleet and get going faster',
+			helpers: [
+				{
+					id: `helper-${primodiumId}-0`,
+					name: 'Game artifact generator',
+					description: 'Create custom add-ons for your industrial complex'
+				},
+				{
+					id: `helper-${primodiumId}-1`,
+					name: 'Brag list',
+					description:
+						'Show off your fleet on your GAV player page'
+				},
+				{
+					id: `helper-${primodiumId}-2`,
+					name: 'Easy play',
+					description: 'Step straight into your planetary empire building with our easy play option'
+				},
+			]
+		},
+		launchPad: launchPadById(primodiumId, 3)
 	},
+
 	{
 		about: aboutByNumber(4),
 		howWeHelp: howWeHelpByNumber(4, ['Cool thing 1', 'Fancy thing 2', 'Awesome thing 3']),
 		launchPad: launchPadById(4, 4)
 	},
+
+	{
+		about: {
+			id: skystrifeId,
+			logLine: 'Gain control over the asteroid belt by building your industrial empire',
+			title: 'skystrife',
+			imageUrl: skystrifeImgSrc,
+			blurb: `Secure the Ember Crown by being the last one standing in this fast-paced, real
+time strategy game. Each turn, you can move or attack with your army, conquering
+mines or destroying enemy units. Boost your gold reserves to secure that Crown. 
+
+Will you be the last one standing?`
+		},
+		howWeHelp: {
+			id: `${skystrifeId}-augmentation`,
+			gameId: skystrifeId,
+			logLine: 'Will you be the last one standing?',
+			blurb: 'Skip the invite codes, accelerate your world building and find your team',
+			helpers: [
+				{
+					id: `helper-${skystrifeId}-0`,
+					name: 'Easy play',
+					description: 'Start conquering islands with your hero and 1,000 gold units with our easy play option'
+				},
+				{
+					id: `helper-${skystrifeId}-1`,
+					name: 'Brag list',
+					description:
+						'Showcase your army, gold reserve and conquered territory on your GAV player page'
+				},
+				{
+					id: `helper-${skystrifeId}-2`,
+					name: 'Artifact generator',
+					description: 'Customize your islands and armies and make them yours'
+				},
+			]
+		},
+		launchPad: launchPadById(skystrifeId, 3)
+	},
+
+
 	{
 		about: aboutByNumber(5),
 		howWeHelp: howWeHelpByNumber(5, ['Cool thing 1', 'Fancy thing 2', 'Awesome thing 3']),

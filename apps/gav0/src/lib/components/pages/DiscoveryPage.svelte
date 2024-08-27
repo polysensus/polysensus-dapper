@@ -1,9 +1,8 @@
 <script lang="ts">
 	// --- lib deps
-	import { sixGameSelector as selector } from '$lib/placeholders/gamediscoveryselectors';
-	import type { GameTeaserAboutContent } from '$lib/models/components';
+	import { sevenGameSelector as selector } from '$lib/placeholders/gamediscoveryselectors';
 	// --- framework
-	import { onMount, setContext, getContext, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	// --- external components
 	// --- components
 
