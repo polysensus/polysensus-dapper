@@ -14,6 +14,13 @@ const config: StorybookConfig = {
 		name: '@storybook/sveltekit',
 		options: {}
 	},
+  svelteOptions: {
+    preprocess: require('svelte-preprocess')({
+      typescript: {
+        transpileOnly: true,
+      },
+    }),
+  },
 	// core: {
 	// 	builder: '@storybook/builder-vite'
 	// },

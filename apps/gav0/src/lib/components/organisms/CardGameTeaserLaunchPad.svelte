@@ -49,9 +49,6 @@
 					<dl class="list-dl">
 						{#each game.launchers as launcher (launcher.id)}
 							<div class="launcher-contaner">
-								<span class="badge bg-primary-500">
-									<i class="fa {launcher.iconName ?? 'fa-smile-o'}" aria-hidden="true"></i>
-								</span>
 								<span class="flex-auto">
 									<dt>{launcher.name}</dt>
 									<dd>
@@ -59,9 +56,9 @@
 									</dd>
 								</span>
 								{#if launcher.launchUrl}
-									<a href={launcher.launchUrl} class="btn variant-filled launcher-button">
+									<a href={launcher.launchUrl} class="btn variant-ghost launcher-button">
 										<span>Launch {launcher.name}</span>
-										<span><i class="fa fa-rocket" aria-hidden="true"></i></span>
+										<span><i class="fa {launcher.iconName ?? 'fa-smile-o'}" aria-hidden="true"></i></span>
 									</a>
 								{/if}
 							</div>

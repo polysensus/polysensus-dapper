@@ -23,6 +23,7 @@
     "@skeletonlabs/tw-plugin": "0.4.0",
     "@storybook/addon-essentials": "^8.2.9",
     "@storybook/addon-interactions": "^8.2.9",
+    "@storybook/addon-knobs": "^8.0.1",
     "@storybook/addon-links": "^8.2.9",
     "@storybook/addon-svelte-csf": "^4.1.6",
     "@storybook/addon-themes": "^8.2.9",
@@ -69,6 +70,8 @@
     "@web3auth/no-modal": "^8.12.3",
     "@web3auth/openlogin-adapter": "^8.12.2",
     "highlight.js": "11.10.0",
+    "idb": "^8.0.0",
+    "tailwind-merge": "^2.5.2",
     "viem": "^2.19.6"
   },
   "eslintConfig": {

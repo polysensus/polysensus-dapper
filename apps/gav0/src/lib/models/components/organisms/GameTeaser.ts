@@ -6,10 +6,16 @@ export type GameTeaserAboutContent = {
 	imageUrl: string;
 };
 
+export type GameFabricatorHelperLink = {
+  fabId: string;
+  buttonText: string;
+}
+
 export type GameTeaserHelperContent = {
 	id: string;
 	name: string;
 	description: string;
+  fabLink?: GameFabricatorHelperLink;
 };
 
 export type GameTeaserHowWeHelpContent = {

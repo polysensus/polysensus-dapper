@@ -185,7 +185,8 @@ What will your world look like?`
 				{
 					id: `helper-${biomesId}-0`,
 					name: 'Blueprints fabricator',
-					description: 'Rapid, automatic, blueprint creation and experience deployment'
+					description: 'Rapid, automatic, blueprint creation and experience deployment',
+          fabLink: {fabId: 'blueprints', buttonText: 'Blueprint Fab'}
 				},
 				{
 					id: `helper-${biomesId}-1`,
@@ -195,8 +196,9 @@ What will your world look like?`
 				},
 				{
 					id: `helper-${biomesId}-2`,
-					name: 'Team beacon',
-					description: 'Incentivize team building and collaboration'
+					name: 'Graffiti fabricator',
+					description: 'Leave your mark on the world with custom graffiti',
+          fabLink: {fabId: 'graffiti', buttonText: 'Graffiti Fab'}
 				},
 			]
 		},

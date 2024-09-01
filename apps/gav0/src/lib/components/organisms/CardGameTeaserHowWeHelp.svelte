@@ -1,4 +1,6 @@
 <script lang="ts">
+	import hljs from "highlight.js";
+
 	// --- lib deps
 	// --- framework
 	// import { onMount , setContext, getContext, onDestroy } from 'svelte'
@@ -19,6 +21,7 @@
 					id: string;
 					name: string;
 					description: string;
+          fabLink?: { fabId: string, buttonText: string };
 				}[];
 		  }
 		| undefined;
@@ -31,6 +34,9 @@
 	// --- on dom event callbacks
 	// --- contract state callbacks
 	// --- component helpers
+  function route(gameId: string, generatorType: string): string {
+    return `/fabricator/${gameId}/${generatorType}`;
+  }
 </script>
 
 <div class="card rounded-none">
@@ -47,12 +53,19 @@
 					<dl class="list-dl">
 						{#each game.helpers as helper (helper.id)}
 							<div>
-								<span class="badge bg-primary-500"
-									><i class="fa fa-gift" aria-hidden="true"></i></span
-								>
+                {#if !helper.fabLink}
+								<span class="badge variant-ghost"
+									><i class="fa fa-gift" aria-hidden="true"></i></span>
+                {/if}
 								<span class="flex-auto">
-									<dt>{helper.name}</dt>
+									<dt>{helper.name} </dt>
 									<dd>{helper.description}</dd>
+                  {#if helper.fabLink}
+									  <a href={route(game.gameId, helper.fabLink.fabId)} class="btn variant-outline launcher-button">
+									  	<span>{helper.fabLink.buttonText}</span>
+									  	<span><i class="fa fa-compass-drafting" aria-hidden="true"></i></span>
+									  </a>
+                  {/if}
 								</span>
 							</div>
 							<!-- ... -->
