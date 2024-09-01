@@ -123,47 +123,6 @@ export const singleGameSelector: GameDiscoverySelector = new GameDiscoverySelect
 export const sevenGameSelector: GameDiscoverySelector = new GameDiscoverySelector([
 	{
 		about: {
-			id: shrapnelId,
-			logLine: 'Can you survive this high-stakes extraction challenge?',
-			title: 'Shrapnel',
-			imageUrl: shrapnel2024,
-			blurb: `
-It’s 2038. An asteroid collides with the moon. Lunar meteorites bombard a 500km
-radius on  Earth.  This Sacrifice Zone is permanently evacuated and guarded by
-paramilitary.  Until shrapnel from the meteor, full of  valuable resources, is
-discovered in the Sacrifice Zone. Guards become mercenaries, risking their lives
-to extract the valuable shrapnel from the Zone. 
-
-Can you survive this high-stakes extraction challenge?`
-		},
-		howWeHelp: {
-			id: `${shrapnelId}-augmentation`,
-			gameId: shrapnelId,
-			logLine: 'Power up your extraction team',
-			blurb: 'Map and cosmentics creators, brag panel for your home page',
-			helpers: [
-				{
-					id: `helper-${shrapnelId}-0`,
-					name: 'Map and cosmetics creator',
-					description:
-						'Create your own maps and cosmetics to survive the Shrapnel extraction challenge'
-				},
-				{
-					id: `helper-${shrapnelId}-1`,
-					name: 'Brag list',
-					description: 'Show off your extracted shrapnel and creations on your player page'
-				},
-				{
-					id: `helper-${shrapnelId}-2`,
-					name: 'Graffiti',
-					description: 'Leave your mark on a valuable piece of shrapnel. Post-apocalyptic graffiti'
-				}
-			]
-		},
-		launchPad: launchPadById(shrapnelId, 4)
-	},
-	{
-		about: {
 			id: biomesId,
 			logLine: 'What will your world look like?',
 			title: 'BIOMES',
@@ -204,6 +163,48 @@ What will your world look like?`
 		},
 		launchPad: launchPadById(biomesId, 3)
 	},
+	{
+		about: {
+			id: shrapnelId,
+			logLine: 'Can you survive this high-stakes extraction challenge?',
+			title: 'Shrapnel',
+			imageUrl: shrapnel2024,
+			blurb: `
+It’s 2038. An asteroid collides with the moon. Lunar meteorites bombard a 500km
+radius on  Earth.  This Sacrifice Zone is permanently evacuated and guarded by
+paramilitary.  Until shrapnel from the meteor, full of  valuable resources, is
+discovered in the Sacrifice Zone. Guards become mercenaries, risking their lives
+to extract the valuable shrapnel from the Zone. 
+
+Can you survive this high-stakes extraction challenge?`
+		},
+		howWeHelp: {
+			id: `${shrapnelId}-augmentation`,
+			gameId: shrapnelId,
+			logLine: 'Power up your extraction team',
+			blurb: 'Map and cosmentics creators, brag panel for your home page',
+			helpers: [
+				{
+					id: `helper-${shrapnelId}-0`,
+					name: 'Map and cosmetics creator',
+					description:
+						'Create your own maps and cosmetics to survive the Shrapnel extraction challenge'
+				},
+				{
+					id: `helper-${shrapnelId}-1`,
+					name: 'Brag list',
+					description: 'Show off your extracted shrapnel and creations on your player page'
+				},
+				{
+					id: `helper-${shrapnelId}-2`,
+					name: 'Graffiti',
+					description: 'Leave your mark on a valuable piece of shrapnel. Post-apocalyptic graffiti'
+				}
+			]
+		},
+		launchPad: launchPadById(shrapnelId, 4)
+	},
+
 	{
 		about: {
 			id: primodiumId,
