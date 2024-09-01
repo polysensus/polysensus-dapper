@@ -55,7 +55,6 @@
 		<slot />
 	</svelte:fragment>
 </AppBar>
-
 <style>
 	.app-bar {
 		display: flex;

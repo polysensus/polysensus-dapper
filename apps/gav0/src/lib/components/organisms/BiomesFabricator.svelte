@@ -72,7 +72,7 @@ function routeGenerator(route: string): string {
       {/if}
     </FabricatorTabs>
   </div>
-  <div class="flex-grow-0 flex-shrink-0 basis-full md:basis-1/3">
+  <div class="flex-grow-0 flex-shrink-0 basis-full md:basis-1/3 mt-4">
     <FabricatorArtefactDeployer>
       <div slot="top">
         <BiomesPreviewPane image={{src: blueprintImgSrc0, alt: "Biomes preview image"}} meta={meta}/>

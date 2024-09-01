@@ -18,7 +18,8 @@ export let suggestion: string;
 export let promptPos: "top" | "bottom" = "top";
 
 // --- component state properties
-$: gridStyles = `grid grid-cols-${stride} md:grid-cols-${strideWide} gap-4`
+// $: gridStyles = `grid grid-cols-${stride} md:grid-cols-${strideWide} gap-4`
+let gridStyles = `grid grid-cols-2 md:grid-cols-2 gap-4`
 
 // --- svelte bound variables
 // let instance = undefined
