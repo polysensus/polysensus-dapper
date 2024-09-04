@@ -124,10 +124,10 @@ export const sevenGameSelector: GameDiscoverySelector = new GameDiscoverySelecto
 	{
 		about: {
 			id: biomesId,
-			logLine: 'What will your world look like?',
+			logLine: ':What will your world look like?',
 			title: 'BIOMES',
 			imageUrl: biomesImgSrc,
-			blurb: `Wonder around, play mini-games, team up and craft your own experience in this
+			blurb: `Wonder around, play mini-games, team up with friends and craft your own experience in this
 MMORPG sandbox. Fish, craft, farm, create.
 
 Like Roblox or Minecraft, but with many more opportunities to create your own
