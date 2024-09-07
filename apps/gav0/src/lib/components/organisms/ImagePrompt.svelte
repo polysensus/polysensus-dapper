@@ -37,7 +37,6 @@ let gridStyles = `grid grid-cols-2 md:grid-cols-2 gap-4`
 </div>
 {/if}
 
-<p>stride: {stride}</p>
 <section class={gridStyles}>
   {#each panels as panel, i (panel.id)}
     <div class="relative h-0 pb-[100%]">
