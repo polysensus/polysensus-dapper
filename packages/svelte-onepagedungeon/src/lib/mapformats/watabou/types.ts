@@ -4,6 +4,8 @@ export type * from './navigabledungeon.js';
 export type * from './prosehelpers.js';
 export type * from './rng.js';
 export type * from './scenenarration.js';
-export type * from './svgops.js'
-export type * from './svgplain.js'
+export type * from './svg/dungeonlayers.js'
+export type * from './svg/dungeon.js'
+export type * from './svg/utilities.js'
 export type * from './utilities.js';
+export type * from './svg/locationlayers.js';
