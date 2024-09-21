@@ -1,14 +1,16 @@
 import type { Option, Command } from "commander";
 import { InvalidArgumentError } from "commander";
 import { JSDOM } from "jsdom";
+import path from "path";
 import { DOMImplementation, XMLSerializer } from "xmldom";
 
 import type { Dungeon } from "@polysensus-dapper/svelte-onepagedungeon";
-import { parseDungeon } from "@polysensus-dapper/svelte-onepagedungeon";
+import { SVGDungeonLayer } from "@polysensus-dapper/svelte-onepagedungeon";
 import type { JsonDungeon } from "@polysensus-dapper/svelte-onepagedungeon";
-import { getDungeonPathElements } from "@polysensus-dapper/svelte-onepagedungeon";
-import { getTileSVGString } from "@polysensus-dapper/svelte-onepagedungeon";
-import { svgPlainify } from "@polysensus-dapper/svelte-onepagedungeon";
+// import { svgPlainify, svgEmptyDungeonClone, svgDungeonInsert } from "@polysensus-dapper/svelte-onepagedungeon";
+import { SVGDungeon, SVGDungeonModel, SVGDungeonPlain, SVGNodeFactory } from "@polysensus-dapper/svelte-onepagedungeon";
+import { SVGLayerId } from "@polysensus-dapper/svelte-onepagedungeon";
+// import type { SVGLayerId } from "@polysensus-dapper/svelte-onepagedungeon";
 
 import { readJson, readText, writeSVGTile, writeTextFile } from "./fsutil.js";
 
@@ -48,29 +50,33 @@ async function analyze(program: Command, options: Options) {
   vout(JSON.stringify(jsonDungeon, null, '  '));
   const name = dungeonName(jsonDungeon);
   const outputDir = options.output.replace("<name>", name);
+  const serializer = new XMLSerializer();
 
   // The actual svg file name is derived from the json file name
   const dom = svgDOM(options.file);
   const document = dom.window.document;
-  const svg: SVGElement | null = dom.window.document.querySelector("svg");
-  if (!svg) throw new Error(`No SVG found in file ${options.file}`);
-  svgPlainify(svg);
-  const svgDungeonElements = getDungeonPathElements(svg);
+  const model = new SVGDungeonModel(svgDOM(options.file).window.document);
+  console.log(`Room count: ${model.locationCount}`)
+  const plain = new SVGDungeonPlain(svgDOM(options.file).window.document)
+  const factory = new SVGNodeFactory(svgDOM(options.file).window.document)
 
-  const serializer = new XMLSerializer();
-  writeTextFile(outputDir + `/${name}.svg`, serializer.serializeToString(svg));
-  svgDungeonElements.forEach((element: SVGPathElement, index: number) => {
-    const tileSVG = getTileSVGString(document, element, index, { margin: 10 });
-    // Serialize the SVG document to a string
-    const svgData = serializer.serializeToString(tileSVG);
-    // Add XML declaration
-    const xmlDeclaration = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n';
-    writeSVGTile(outputDir, index, xmlDeclaration + svgData);
-  });
+  writeTextFile(path.dirname(outputDir) + `/${name}.plain.svg`, serializer.serializeToString(plain.svg));
+  writeTextFile(path.dirname(outputDir) + `/${name}.orig.svg`, serializer.serializeToString(model.svg));
 
-  // const jsonDungeon = loadJsonFile(options.file);
-  // const seed = resolveSeed(options, jsonDungeon);
-  // const dungeon = parseDungeon(seed, jsonDungeon);
+  for (let i = 0; i < model.locationCount; i++) {
+    const root = factory.wrapGeometry(model.getLocation(i));
+    writeSVGTile(outputDir, i, serializer.serializeToString(root));
+  }
+
+
+
+  for (let i = SVGLayerId.Hatching; i < SVGLayerId.LastLayer; i++) {
+    const paths = SVGDungeonLayer.selectPaths(model.svg, i);
+    console.log(`${SVGDungeonLayer.name(i)}: path count: ${paths.length}`);
+    const root = factory.wrapGeometry(SVGDungeon.groupPath(document, paths));
+    const layer = SVGLayerId[i].toLowerCase();
+    writeTextFile(path.dirname(outputDir) + `/${name}.${layer}.svg`, serializer.serializeToString(root));
+  }
 }
 
 function loadJsonFile(file: string): JsonDungeon {
@@ -103,3 +109,35 @@ function resolveSeed(options: Options, dungeon: JsonDungeon): number {
       throw new Error(`Provide a seed file or an explicit seed value`);
   return seed;
 }
+
+/*
+  // g1 is hatching
+  // g2 is outline
+  // g3 is floor grid
+  // g4 is clip path (invisible ?) 
+  // g6 is corner details
+  // g7 is floor furniture (chests, etc)
+  // g8 is very faint room outline
+  // g9 is doors and stairs
+  const trims: { [key: string]: number } = {
+    hatching: 2,
+    outline: 2,
+    grid: 2,
+    clippath: 3,
+    cornerDetails: 2,
+    furniture: 2,
+    faintOutline: 2,
+    exits: 2,
+  }
+
+  const layers: { [key: string]: SVGElement } = {};
+  const pathLayers: { [key: string]: SVGPathElement[] } = {};
+  for (let i = SVGLayerId.Hatching; i < SVGLayerId.LastLayer; i++) {
+    const name = SVGLayerId[i].toLowerCase();
+    layers[name] = SVGDungeonLayer.select(svg, i);
+    const paths = SVGDungeonLayer.selectPaths(svg, i);
+    pathLayers[name] = paths.slice(trims[name]);
+    console.log(`Layer paths: ${paths.length} ${pathLayers[name].length} ${SVGLayerId[i].toLowerCase()}`);
+  }
+
+*/
