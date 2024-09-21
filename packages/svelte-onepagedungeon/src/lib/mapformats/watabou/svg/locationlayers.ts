@@ -15,7 +15,7 @@ export const defaultLayerMask: { [key: number]: boolean } = {
   [SVGLayerId.CornerDetails]: true,
   [SVGLayerId.Furniture]: true,
   [SVGLayerId.FaintOutline]: false,
-  [SVGLayerId.Exits]: true,
+  [SVGLayerId.WallShading]: true,
 }
 export class LayerSelector {
   id: SVGLayerId;
@@ -26,11 +26,32 @@ export class LayerSelector {
     this.range = range;
     this.specials = specials;
   }
+
   selectPaths(svg: SVGElement): SVGPathElement[] {
-    return SVGDungeonLayer.selectPaths(svg, this.id).slice(...this.range);
+    return SVGDungeonLayer.selectPaths(svg, this.id);
+    const regular = SVGDungeonLayer.selectPaths(svg, this.id).slice(...this.range);
+    const special = this.selectSpecials(svg)
+    return [...regular, ...special]
+  }
+
+  selectLocationPaths(svg: SVGElement): SVGPathElement[] {
+    const selection = SVGDungeonLayer.selectPaths(svg, this.id);
+    return selection.slice(...this.range);
+  }
+
+  selectSpecials(svg: SVGElement): SVGPathElement[] {
+    const selection = SVGDungeonLayer.selectPaths(svg, this.id);
+    const paths: SVGPathElement[] = [];
+    for (const i of Object.values(this.specials)) {
+      const p = selection[i];
+      if (!p)
+        continue
+      paths.push(selection[i])
+    }
+    return paths;
   }
   selectBounds(svg: SVGElement): SVGBound[] {
-    return this.selectPaths(svg).map((path) => SVGUtils.pathBounds([path]));
+    return this.selectLocationPaths(svg).map((path) => SVGUtils.pathBounds([path]));
   }
 
   /** returns an object, keyed by indices into the bounds array, where each value is the portion of the special in the associated bound*/
@@ -49,7 +70,7 @@ export class LayerSelector {
   }
 
   groupPaths(svg: SVGElement, bounds: SVGBound[]): { [key: number]: SVGPathElement[] } {
-    const paths = this.selectPaths(svg);
+    const paths = this.selectLocationPaths(svg);
     return SVGUtils.groupPaths(bounds, paths);
   }
 
@@ -74,20 +95,24 @@ export class LocationLayers {
     this.all = {};
     for (let i = SVGLayerId.Hatching; i < SVGLayerId.LastLayer; i++) {
       this.specials[i] = selectors[i].groupSpecials(svg, roomBounds);
-      this.regular[i] = SVGUtils.groupPaths(roomBounds, selectors[i].selectPaths(svg));
+      this.regular[i] = SVGUtils.groupPaths(roomBounds, selectors[i].selectLocationPaths(svg));
       this.all[i] = { ...this.regular[i] };
       for (let j = 0; j < roomBounds.length; j++) {
         if (!this.specials[i][j]) continue;
+        if (!this.all[i][j]) this.all[i][j] = [];
         this.all[i][j].push(this.specials[i][j]);
       }
     }
   }
 
-  locationPaths(id: number, mask?: {[key:number]: boolean}): SVGPathElement[] {
+  locationPaths(id: number, mask?: { [key: number]: boolean }): SVGPathElement[] {
     if (!mask) mask = defaultLayerMask;
     const paths: SVGPathElement[] = [];
-    for (let i = SVGLayerId.Hatching; i < SVGLayerId.LastLayer; i++) {
-      if (!mask[i]) continue;
+    for (const [istr, select] of Object.entries(mask)) {
+      if (!select) continue;
+      const i = Number(istr);
+      // for (let i = SVGLayerId.Hatching; i < SVGLayerId.LastLayer; i++) {
+      if (!this.all[i][id]) continue;
       paths.push(...this.all[i][id]);
     }
     return paths;
@@ -98,9 +123,9 @@ export const layerSelectors: { [key: number]: LayerSelector } = {
   [SVGLayerId.Hatching]: new LayerSelector(SVGLayerId.Hatching, [2, -1], { "hatching": -1 }),
   [SVGLayerId.Outline]: new LayerSelector(SVGLayerId.Outline, [2, undefined], { "outline": 1 }),
   [SVGLayerId.Grid]: new LayerSelector(SVGLayerId.Grid, [1, -1], { "grid": -1 }),
-  [SVGLayerId.Clippath]: new LayerSelector(SVGLayerId.Grid, [2, undefined], {}),
-  [SVGLayerId.CornerDetails]: new LayerSelector(SVGLayerId.Grid, [2, undefined], {}),
-  [SVGLayerId.Furniture]: new LayerSelector(SVGLayerId.Grid, [2, undefined], {}),
-  [SVGLayerId.FaintOutline]: new LayerSelector(SVGLayerId.Grid, [2, undefined], { "outline": 1 }),
-  [SVGLayerId.Exits]: new LayerSelector(SVGLayerId.Grid, [2, undefined], {}),
+  [SVGLayerId.Clippath]: new LayerSelector(SVGLayerId.Clippath, [2, undefined], { "special": 1 }),
+  [SVGLayerId.CornerDetails]: new LayerSelector(SVGLayerId.CornerDetails, [2, undefined], { "special": 1 }),
+  [SVGLayerId.Furniture]: new LayerSelector(SVGLayerId.Furniture, [1, undefined], {}),
+  [SVGLayerId.FaintOutline]: new LayerSelector(SVGLayerId.FaintOutline, [2, undefined], { "outline": 1 }),
+  [SVGLayerId.WallShading]: new LayerSelector(SVGLayerId.WallShading, [1, undefined], {}),
 }

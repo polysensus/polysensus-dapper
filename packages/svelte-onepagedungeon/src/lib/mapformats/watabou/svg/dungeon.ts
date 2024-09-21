@@ -2,7 +2,48 @@ import { SVGLayerId } from "./dungeonlayers.js";
 import { SVGUtils } from "./utilities.js";
 import type { SVGBound } from "./utilities.js";
 import { SVGDungeonLayer } from "./dungeonlayers.js";
-import { LocationLayers, layerSelectors } from "./locationlayers.js";
+import { LocationLayers, defaultLayerMask, layerSelectors } from "./locationlayers.js";
+
+export class SVGNodeFactory {
+
+  // cloned of a heuristically pruned map document as a lazy way to setup
+  // all the basics
+  empty: SVGElement
+
+  constructor(doc: Document) {
+    let svg: SVGElement | null = doc.querySelector("svg");
+    if (!svg) throw new Error(`No SVG found document`);
+
+    SVGDungeon.plainify(svg);
+    this.empty = SVGDungeon.emptyClone(svg);
+
+  }
+
+  wrapGeometry(g: SVGElement): SVGElement {
+    const bounds = SVGUtils.elementBounds(g);
+    const root = this.empty.cloneNode(true) as SVGElement;
+    SVGDungeon.insertElement(root, g);
+    SVGUtils.setBoundsRect(root, bounds);
+    return root;
+  }
+}
+
+export class SVGDungeonPlain {
+
+  emptyDungeon: SVGElement
+  svg: SVGElement;
+
+  constructor(doc: Document) {
+
+    let svg: SVGElement | null = doc.querySelector("svg");
+    if (!svg) throw new Error(`No SVG found document`);
+
+    this.svg = svg;
+    SVGDungeon.plainify(this.svg);
+    this.emptyDungeon = SVGDungeon.emptyClone(this.svg);
+  }
+
+}
 
 export class SVGDungeonModel {
 
@@ -10,10 +51,7 @@ export class SVGDungeonModel {
   doc: Document;
 
   // The original svg
-  origSVG: SVGElement;
-
-  // The plainified svg
-  svg: SVGElement
+  svg: SVGElement;
 
   // The bounding rectables of the rooms, this is derived from the outline layer
   // The index is also the room id
@@ -21,37 +59,44 @@ export class SVGDungeonModel {
 
   locationLayers: LocationLayers;
 
-  emptyDungeon: SVGElement
+  layersMask: { [key: number]: boolean };
 
   get locationCount(): number {
     return this.locationBounds.length;
   }
 
   constructor(doc: Document) {
+
     this.doc = doc;
-    const svg: SVGElement | null = this.doc.querySelector("svg");
+    let svg: SVGElement | null = this.doc.querySelector("svg");
     if (!svg) throw new Error(`No SVG found document`);
 
-    this.origSVG = svg;
-    this.svg = this.origSVG.cloneNode(true) as SVGElement;
-    SVGDungeon.plainify(this.svg);
+    this.svg = svg;
 
-    this.emptyDungeon = SVGDungeon.emptyClone(this.svg);
-
+    this.layersMask = defaultLayerMask;
     this.locationBounds = SVGDungeon.roomBoundaries(this.svg);
     this.locationLayers = SVGDungeon.locationLayers(this.svg, this.locationBounds);
-
-
-    console.log(`Room count: ${this.locationCount}`)
   }
 
-  getLocation(id: number, options?: { wrapped?: boolean, viewBox?: boolean }): SVGElement {
+  get layerIds(): number[] {
+    const ids = Object.entries(this.layersMask)
+      .filter(([k, v]) => v)
+      .map(([k, v]) => Number(k))
+    ids.sort((a, b) => a - b);
+    return ids;
+    // return Object.keys(this.layersMask).map((s) => Number(s))
+  }
+
+  getLocation(id: number): SVGElement {
 
     const bounds = this.getBounds(id);
     const g = this.doc.createElementNS("http://www.w3.org/2000/svg", "g");
 
+    // for (const i of this.layerIds) {
     for (let i = SVGLayerId.Hatching; i < SVGLayerId.LastLayer; i++) {
-      const paths = this.locationLayers.locationPaths(id, { [i]: true });
+      if (!this.layersMask[i]) continue;
+
+      const paths = this.locationLayers.locationPaths(id, { [i]: true }).map((el) => el.cloneNode(true) as SVGPathElement);
       const el = SVGDungeon.groupPath(this.doc, paths);
       el.setAttribute("id", `location-${id}`)
       el.setAttribute("layer-id", SVGLayerId[i].toLowerCase())
@@ -60,48 +105,9 @@ export class SVGDungeonModel {
       else
         el.setAttribute("data-room-id", `room-${id}`);
       g.appendChild(el);
-
     }
 
-    // note: ignore bounds if not wrapped
-    if (!options?.wrapped) return g;
-    const root = this.emptyDungeon.cloneNode(true) as SVGElement;
-    SVGDungeon.insertElement(root, g);
-
-    if (!options?.viewBox) return root;
-    const viewBox = `${bounds.left} ${bounds.top} ${bounds.right - bounds.left} ${bounds.bottom - bounds.top}`;
-    root.querySelector("rect")?.setAttribute("viewBox", viewBox);
-
-    return root;
-  }
-
-  getLayer(layer: SVGLayerId, options?: { wrapped: boolean, viewBox: boolean }): SVGElement {
-
-    const paths = layerSelectors[layer].selectPaths(this.svg);
-    const el = SVGDungeon.groupPath(this.doc, paths);
-    if (!options?.wrapped) return el;
-    const root = this.emptyDungeon.cloneNode(true) as SVGElement;
-    SVGDungeon.insertElement(root, el);
-
-    if (!options?.viewBox) return root;
-
-    const bounds = SVGUtils.pathBounds(paths);
-    const viewBox = `${bounds.left} ${bounds.top} ${bounds.right - bounds.left} ${bounds.bottom - bounds.top}`;
-    root.querySelector("rect")?.setAttribute("viewBox", viewBox);
-
-    return root;
-  }
-
-  /**
-   * Wrap the element as
-   * @returns 
-   */
-  wrapForBoundsView(bounds: SVGBound, el: SVGElement): SVGElement {
-    const root = this.emptyDungeon.cloneNode(true) as SVGElement;
-    const viewBox = `${bounds.left} ${bounds.top} ${bounds.right - bounds.left} ${bounds.bottom - bounds.top}`;
-    root.querySelector("rect")?.setAttribute("viewBox", viewBox);
-    SVGDungeon.insertElement(root, el);
-    return root;
+    return g;
   }
 
   getBounds(id: number): SVGBound {

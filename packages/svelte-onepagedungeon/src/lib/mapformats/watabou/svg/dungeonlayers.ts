@@ -7,7 +7,7 @@ export enum SVGLayerId {
   CornerDetails,
   Furniture,
   FaintOutline,
-  Exits,
+  WallShading,
   LastLayer,
 }
 

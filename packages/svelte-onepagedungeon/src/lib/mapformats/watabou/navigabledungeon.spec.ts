@@ -17,7 +17,7 @@ import {
 import type { Dungeon } from "./formatprimitives.js"
 
 test("parseDungeon() parses as expected", () => {
-  const dungeon = parseDungeon(mockDungeon)
+  const dungeon = parseDungeon(42, mockDungeon)
   expect(dungeon).toEqual(expectedParsedMockDungeon)
 })
 
@@ -76,6 +76,7 @@ describe("isOpposite with invalid directions", () => {
 const expectedParsedMockDungeon: Dungeon = {
   version: "1",
   title: "Mock Dungeon",
+  seed: 42,
   story: "Mock Dungeon Story",
   rects: [
     {

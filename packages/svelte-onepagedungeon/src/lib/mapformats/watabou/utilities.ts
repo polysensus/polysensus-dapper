@@ -2,6 +2,17 @@ import type { Room, Exit } from "./formatprimitives.js";
 import { getRandomNumber } from "./rng.js";
 import { hasProperty } from "$lib/idiomatic.js";
 
+export function gcd(a: number, b: number): number {
+  a = Math.floor(Math.abs(a));
+  b = Math.floor(Math.abs(b));
+  while (b !== 0) {
+    const temp = b;
+    b = a % b;
+    a = temp;
+  }
+  return a;
+}
+
 /**
  * Composes a sequence of functions that transform a single input value into a final output value.
  *

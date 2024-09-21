@@ -1,3 +1,5 @@
+import { gcd } from "../utilities.js";
+
 export type SVGBound = {
   left: number
   right: number
@@ -14,8 +16,8 @@ namespace SVGUtils {
     return {
       left: bound.left - amount,
       right: bound.right + amount,
-      top: bound.top + amount,
-      bottom: bound.bottom - amount
+      top: bound.top - amount,
+      bottom: bound.bottom + amount
     }
   }
 
@@ -23,21 +25,63 @@ namespace SVGUtils {
     return bounds.reduce((acc, bound) => {
       const w = Math.abs(bound.right - bound.left);
       if (w === 0) return acc;
-      const h = Math.abs(bound.top - bound.bottom);
+      const h = Math.abs(bound.bottom - bound.top);
       if (h === 0) return acc;
       const aw = Math.abs(acc.right - acc.left);
-      const ah = Math.abs(acc.top - acc.bottom);
+      if (aw === 0) return bound; // if acc is 0, bound is the first non-zero bound
+      const ah = Math.abs(acc.bottom - acc.top);
+      if (ah === 0) return bound; // if acc is 0, bound is the first non-zero bound
       if (w * h < aw * ah) return bound;
       return acc;
     }, bounds[0])
   }
 
-  export function enlargeByUnits(bounds: SVGBound[], amount: number): SVGBound[] {
+  export function unionBound(bounds: SVGBound[]): SVGBound {
+    return bounds.reduce((acc, bound) => {
+      return {
+        left: Math.min(acc.left, bound.left),
+        right: Math.max(acc.right, bound.right),
+        top: Math.min(acc.top, bound.top),
+        bottom: Math.max(acc.bottom, bound.bottom)
+      }
+    }, bounds[0]);
+  }
+
+  /**
+   * The grid unit is established by taking the GCD of the max and min bounds.
+   * The average of the width and height of the min max bounds is used the input
+   * to GCD to avoid issues with skinny rectangles.
+   * @param bounds 
+   * @param amount 
+   * @returns 
+   */
+
+  export function gridUnit(bounds: SVGBound[]): number {
+    const max = unionBound(bounds);
+    // average them to avoid issues with skiny bounds
+    const maxu = (Math.abs(max.right - max.left) + Math.abs(max.bottom - max.top)) / 2;
+
     const min = minBound(bounds);
     const w = Math.abs(min.right - min.left);
-    const h = Math.abs(min.top - min.bottom);
-    const u = w < h ? w : h;
-    return bounds.map(bound => enlargeBound(bound, amount * u));
+    const h = Math.abs(min.bottom - min.top);
+    // average them to avoid issues with skiny bounds
+    const minu = (w + h) / 2;
+    return gcd(maxu, minu);
+  }
+
+  /**
+   * Enlarge each bounds by the common grid unit.
+   * The grid unit is established by taking the GCD of the max and min bounds.
+   * The average of the width and height of the min max bounds is used the input
+   * to GCD to avoid issues with skinny rectangles.
+   * @param bounds 
+   * @param amount 
+   * @returns 
+   */
+  export function enlargeByUnits(bounds: SVGBound[], amount: number): SVGBound[] {
+    const u = gridUnit(bounds);
+
+    return bounds.map(bound => enlargeBound(bound, amount * u * 0.5));
   }
 
   export function isBound1x1(rect: SVGBound): boolean {
@@ -56,7 +100,7 @@ namespace SVGUtils {
   }
 
   export function isPointInside(bound: SVGBound, point: Point): boolean {
-    return point.x >= bound.left && point.x <= bound.right && point.y >= bound.bottom && point.y <= bound.top;
+    return point.x >= bound.left && point.x <= bound.right && point.y <= bound.bottom && point.y >= bound.top;
   }
 
   export function linesInside(bound: SVGBound, segments: LineSegment[]): LineSegment[] {
@@ -134,6 +178,17 @@ namespace SVGUtils {
     }
   }
 
+  export function setBoundsRect(root: SVGElement, bounds: SVGBound) {
+    const viewBox = `${bounds.left} ${bounds.top} ${bounds.right - bounds.left} ${bounds.bottom - bounds.top}`;
+    root.querySelector("rect")?.setAttribute("viewBox", viewBox);
+  }
+
+  export function elementBounds(g: SVGElement): SVGBound {
+
+    const nodes = g.querySelectorAll("path");
+    const paths = Array.from(nodes);
+    return pathBounds(paths);
+  }
   export function pathBounds(paths: SVGPathElement[]): SVGBound {
 
     type Bound = {
