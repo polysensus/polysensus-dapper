@@ -42,17 +42,17 @@ export const isAction = (input: string | Action): input is Action =>
   (input.includes(' ') && isAction(input.split(' ')[0]));
 
 /** Exit is derived from One-Page JSON data. Aids navigation. */
-export type Exit = {
+export type WatabouExit = {
   towards: ExitDirection;
   to: number | 'outside';
   description: string;
   isFacing: boolean; // some doors have directions, secret doors for example
   door: Door & { id: number };
-  type: DoorType;
+  type: WatabouDoorType;
   note?: DoorNote;
 };
 
-export enum DoorType {
+export enum WatabouDoorType {
   open,
   door,
   narrow,
@@ -121,6 +121,8 @@ export type Dungeon = JsonDungeon & {
   rooms: (Room & { id: number })[];
   doors: (Door & { id: number })[];
 };
+
+export type Dungeonx = Dungeon & { foo: string };
 
 // enum compatible with Jest
 export const NoteType = {
@@ -206,7 +208,7 @@ export type Room = Rect & {
   id: number;
   description: string;
   area: string;
-  exits: Exit[];
+  exits: WatabouExit[];
   notes?: PlainNote[];
 };
 

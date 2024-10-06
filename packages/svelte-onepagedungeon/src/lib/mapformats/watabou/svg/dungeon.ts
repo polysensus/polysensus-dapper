@@ -1,7 +1,6 @@
 import { SVGLayerId } from "./dungeonlayers.js";
 import { SVGUtils } from "./utilities.js";
 import type { SVGBound } from "./utilities.js";
-import { SVGDungeonLayer } from "./dungeonlayers.js";
 import { LocationLayers, defaultLayerMask, layerSelectors } from "./locationlayers.js";
 
 export class SVGNodeFactory {
@@ -28,7 +27,7 @@ export class SVGNodeFactory {
   }
 }
 
-export class SVGDungeonPlain {
+export class SVGDungeonLayers {
 
   emptyDungeon: SVGElement
   svg: SVGElement;
@@ -84,7 +83,6 @@ export class SVGDungeonModel {
       .map(([k, v]) => Number(k))
     ids.sort((a, b) => a - b);
     return ids;
-    // return Object.keys(this.layersMask).map((s) => Number(s))
   }
 
   getLocation(id: number): SVGElement {
@@ -92,9 +90,7 @@ export class SVGDungeonModel {
     const bounds = this.getBounds(id);
     const g = this.doc.createElementNS("http://www.w3.org/2000/svg", "g");
 
-    // for (const i of this.layerIds) {
-    for (let i = SVGLayerId.Hatching; i < SVGLayerId.LastLayer; i++) {
-      if (!this.layersMask[i]) continue;
+    for (const i of this.layerIds) {
 
       const paths = this.locationLayers.locationPaths(id, { [i]: true }).map((el) => el.cloneNode(true) as SVGPathElement);
       const el = SVGDungeon.groupPath(this.doc, paths);

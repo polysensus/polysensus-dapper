@@ -1,5 +1,5 @@
-import type { Room, Exit } from "./formatprimitives.js";
-import { getRandomNumber } from "./rng.js";
+import type { Room, WatabouExit } from "./formatprimitives.js";
+import { getRandomNumber } from "../../rng.js";
 import { hasProperty } from "$lib/idiomatic.js";
 
 export function gcd(a: number, b: number): number {
@@ -80,7 +80,7 @@ export const sortByExits = (a: Room, b: Room) =>
 /** This gives an expected order to the exits when using numbers to specify them */
 export const sortExitsClockwise =
   (room: { x: number; y: number }) =>
-    (aExit: Exit, bExit: Exit): 1 | 0 | -1 => {
+    (aExit: WatabouExit, bExit: WatabouExit): 1 | 0 | -1 => {
       const a = aExit.door
       const b = bExit.door
       const [ax, ay] = [a.x - room.x, a.y - room.y]

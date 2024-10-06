@@ -1,17 +1,18 @@
 import * as dotenv from "dotenv";
-import type { Option, Command, CommandOptions } from "commander";
 
 dotenv.config({ path: process.env.DOTENV_FILE ?? ".env" });
 
 import { program } from "commander";
 
-import { addAnalyzeCommand } from "./analyze.js";
+import { addExplodeCommand } from "./explodesvg.js";
+import { addMerklizeCommand } from "./merkleize.js";
 
 program
   .enablePositionalOptions()
   .option("-v, --verbose", "more verbose reporting")
 
-addAnalyzeCommand(program);
+addExplodeCommand(program);
+addMerklizeCommand(program);
 
 try {
   program.parse();

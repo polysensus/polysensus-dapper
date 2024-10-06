@@ -4,7 +4,7 @@ import type {
   Direction,
   Door,
   Dungeon,
-  Exit,
+  WatabouExit,
   ExitDirection,
   JsonDungeon,
   JsonNote,
@@ -13,13 +13,13 @@ import type {
   Water,
 } from "./formatprimitives.js"
 
-import { DoorType, facingDirection } from "./formatprimitives.js"
+import { WatabouDoorType, facingDirection } from "./formatprimitives.js"
 
 import { isInside, areOpposite, randomPick as random, isDoorNote, isItemNote, is1x1, isOpposite, doorFunc, getAdjacent, getDir } from "./formatops.js"
 
 import { narrateSceneNote } from "./scenenarration.js"
 import { hasProperty } from "$lib/idiomatic.js"
-import { RandomNumberGenerator } from "./rng.js"
+import { RandomNumberGenerator } from "../../rng.js"
 import { isArmor, isMagic, isTreasure, isWeapon } from "./prosehelpers.js"
 import {
   sortById,
@@ -64,7 +64,7 @@ export const parseDungeon = (seed: number, dungeon: JsonDungeon): Dungeon => {
       const notes = dungeonNotes.filter((note) => isInside(note.pos, fullRoom)).flatMap(narrateSceneNote)
       const columns = dungeon.columns.filter((column) => isInside(column, fullRoom))
       const water = dungeon.water.filter((column) => isInside(column, fullRoom))
-      const exits: Exit[] = getAdjacent(fullRoom, rectsWithId)
+      const exits: WatabouExit[] = getAdjacent(fullRoom, rectsWithId)
         .map((exit) => {
           const door = getDoor(exit)
           const direction = getDir(fullRoom, exit)
@@ -76,7 +76,7 @@ export const parseDungeon = (seed: number, dungeon: JsonDungeon): Dungeon => {
 
             // If the door isFacing and it's of type double, then it might have an associated note.
             const note =
-              isFacing && door.type === DoorType.double
+              isFacing && door.type === WatabouDoorType.double
                 ? notes.filter(isDoorNote).find((doorNote) => doorNote.direction === direction)
                 : undefined
 
@@ -88,8 +88,8 @@ export const parseDungeon = (seed: number, dungeon: JsonDungeon): Dungeon => {
               door,
               ...(note && { note }),
               description: destination ? describeDoor(door, direction, destination) : "way out of the dungeon",
-            } as Exit
-          } else return { towards: direction, to: exit.id } as Exit
+            } as WatabouExit
+          } else return { towards: direction, to: exit.id } as WatabouExit
         })
         .sort(sortExitsClockwise(fullRoom))
       const description = describeRoom(fullRoom, exits, columns, water)
@@ -198,7 +198,7 @@ const waterDescription = (room: Rect, water?: Water[]) => {
   return `${basicDescription}${here}${floodDesc}. `
 }
 
-const describeRoom = (room: Rect, exits: Exit[], columns?: Column[], water?: Water[]): string => {
+const describeRoom = (room: Rect, exits: WatabouExit[], columns?: Column[], water?: Water[]): string => {
   const noun = getRoomNoun(room, exits)
   const columnDesc =
     columns && columns.length > 0
@@ -213,7 +213,7 @@ const describeRoom = (room: Rect, exits: Exit[], columns?: Column[], water?: Wat
   return description
 }
 
-const getRoomNoun = (room: Rect | "outside", exits: Exit[]): string => {
+const getRoomNoun = (room: Rect | "outside", exits: WatabouExit[]): string => {
   if (room === "outside") return room
   const exitsLength = exits.filter((exit) => exit.description !== "secret door").length
   if (is1x1(room)) {
@@ -390,7 +390,7 @@ export const analyzeDungeon = (dungeon: Dungeon) => {
         .some((item) => isTreasure(item) || isMagic(item))
     ) ?? []
   /** Start with a room and include rooms that pass the predicate */
-  const getConnectedRooms = (rooms: Room[], startRoom: Room, predicate: (exit: Exit) => boolean): Room[] => {
+  const getConnectedRooms = (rooms: Room[], startRoom: Room, predicate: (exit: WatabouExit) => boolean): Room[] => {
     const visited = new Set()
     const queue: Room[] = [startRoom]
     const connectedRooms = []
@@ -433,10 +433,10 @@ export const analyzeDungeon = (dungeon: Dungeon) => {
     const unlockedRooms = getConnectedRooms(
       rooms,
       start,
-      (exit: Exit) =>
+      (exit: WatabouExit) =>
         exit.to !== "outside" &&
         !(
-          (exit.type === DoorType.steel || exit.type === DoorType.portcullis || exit.type === DoorType.double) &&
+          (exit.type === WatabouDoorType.steel || exit.type === WatabouDoorType.portcullis || exit.type === WatabouDoorType.double) &&
           exit.isFacing
         )
     )
@@ -452,7 +452,7 @@ export const analyzeDungeon = (dungeon: Dungeon) => {
     getConnectedRooms(
       rooms,
       rooms.find((room) => room.id === 0),
-      (exit: Exit) => exit.type !== DoorType.secret
+      (exit: WatabouExit) => exit.type !== WatabouDoorType.secret
     )
 
   const unlockedRooms = getUnlockedRooms(dungeon.rooms)
@@ -483,7 +483,7 @@ export const analyzeDungeon = (dungeon: Dungeon) => {
     .slice()
     .sort((a: Room, b: Room) => (b.w * b.h > a.w * a.h ? 1 : a.w * a.h > b.w * b.h ? -1 : 0))
 
-  const justInsideId = gateRoom?.exits.find((exit) => exit.type === DoorType.double)?.to
+  const justInsideId = gateRoom?.exits.find((exit) => exit.type === WatabouDoorType.double)?.to
 
   const justInsideRoom = justInsideId ? rooms.find((room) => room.id === justInsideId) : undefined
 

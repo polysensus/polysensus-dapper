@@ -4,7 +4,8 @@
   "type": "module",
   "description": "",
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm -F svelte-onepagedungeon run build && tsc",
+    "build:me": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "main": "pnpm run build && node ./dist/index.js"
   },

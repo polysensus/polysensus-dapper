@@ -15,7 +15,7 @@ export const defaultLayerMask: { [key: number]: boolean } = {
   [SVGLayerId.CornerDetails]: true,
   [SVGLayerId.Furniture]: true,
   [SVGLayerId.FaintOutline]: false,
-  [SVGLayerId.WallShading]: true,
+  [SVGLayerId.Exits]: true,
 }
 export class LayerSelector {
   id: SVGLayerId;
@@ -127,5 +127,5 @@ export const layerSelectors: { [key: number]: LayerSelector } = {
   [SVGLayerId.CornerDetails]: new LayerSelector(SVGLayerId.CornerDetails, [2, undefined], { "special": 1 }),
   [SVGLayerId.Furniture]: new LayerSelector(SVGLayerId.Furniture, [1, undefined], {}),
   [SVGLayerId.FaintOutline]: new LayerSelector(SVGLayerId.FaintOutline, [2, undefined], { "outline": 1 }),
-  [SVGLayerId.WallShading]: new LayerSelector(SVGLayerId.WallShading, [1, undefined], {}),
+  [SVGLayerId.Exits]: new LayerSelector(SVGLayerId.Exits, [1, undefined], {}),
 }

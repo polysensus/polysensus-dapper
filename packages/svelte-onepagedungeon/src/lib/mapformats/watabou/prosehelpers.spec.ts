@@ -1,7 +1,7 @@
 import { describe, it, test, expect } from 'vitest';
 import { expandTally } from "./utilities.js";
 import { inventoryMessage, isArmor, isMagic, isWeapon } from './prosehelpers.js';
-import { RandomNumberGenerator } from './rng.js';
+import { RandomNumberGenerator } from '../../rng.js';
 
 describe("inventoryMessage()", () => {
   it("should count ordinary items", () => {

@@ -1,1 +1,0 @@
-export type * from './lib/mapformats/types.d.ts';

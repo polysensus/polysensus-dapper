@@ -1,6 +1,6 @@
-import type { EnemyClass, Exit, Room } from "./formatprimitives.js"
+import type { EnemyClass, WatabouExit, Room } from "./formatprimitives.js"
 
-import { determineRandomValue } from "./rng.js"
+import { determineRandomValue } from "../../rng.js"
 
 const hasVerb = (str: string) => (/(holds|hides)/.test(str) ? "" : /^\w*s\s/.test(str) ? "are " : "is ")
 
