@@ -10,14 +10,13 @@ struct TokenAuth {
     uint256 sequenceType;
 }
 
-
 library LibTokenAuth {
     struct Layout {
         mapping(uint256 => TokenAuth) tokenAuth;
     }
 
     bytes32 internal constant STORAGE_SLOT =
-        keccak256("LibTokenAuth.storage.src.chaintrap.polysensus");
+        keccak256('LibTokenAuth.storage.src.chaintrap.polysensus');
 
     function layout() internal pure returns (Layout storage s) {
         bytes32 slot = STORAGE_SLOT;

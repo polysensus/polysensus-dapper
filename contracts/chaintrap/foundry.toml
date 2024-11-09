@@ -1,10 +1,12 @@
 [profile.default]
 src = "src"
+test = "tests/foundry"
 out = "out"
 libs = ["dependencies"]
 
-[dependencies]
-forge-std = "1.9.4"
-"@openzeppelin-contracts" = "5.1.0"
+remappings = [
+    "src/=src/",
+    "tests/=tests/foundry/",
+]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

@@ -1,0 +1,17 @@
+{
+  "name": "@polysensus/chaintrap-contracts",
+  "version": "0.5.0",
+  "files": [
+    "abi"
+  ],
+  "scripts": {
+    "build": "forge build && mkdir -p dist/abi && cp -r out/src/arena.sol/*.json dist/abi",
+    "test": "forge test",
+    "lint": "prettier --check --plugin=prettier-plugin-solidity 'src/**/*.sol'",
+    "format": "prettier --write --plugin=prettier-plugin-solidity  'src/**/*.sol'"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "prettier-plugin-solidity": "^1.4.1"
+  }
+}

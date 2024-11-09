@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.23;
 
-import {console} from "forge-std-1.9.4/console.sol";
+import {console} from 'forge-std-1.9.4/console.sol';
 
-import {MerkleProof} from "@openzeppelin-contracts-5.1.0/utils/cryptography/MerkleProof.sol";
+import {MerkleProof} from '@openzeppelin-contracts-5.1.0/utils/cryptography/MerkleProof.sol';
 //import {MerkleProof} from "@openzeppelin-contracts-5.1.0/contracts/utils/cryptography/MerkleProof.sol";
-import "./interfaces/IProofStackErrors.sol";
+import './interfaces/IProofStackErrors.sol';
 
 struct ProofLeaf {
     uint256 typeId;
@@ -55,28 +55,46 @@ struct StackState {
 library LibProofStack {
     /// @dev compute the leaf pre-image assuming that the inputs are the actual
     /// values rather than references.
-    function directPreimage(ProofLeaf calldata leaf) internal pure returns (bytes memory) {
+    function directPreimage(
+        ProofLeaf calldata leaf
+    ) internal pure returns (bytes memory) {
         return abi.encode(leaf.typeId, leaf.inputs);
     }
 
-    function directPreimage(ProofLeaf storage leaf) internal view returns (bytes memory) {
+    function directPreimage(
+        ProofLeaf storage leaf
+    ) internal view returns (bytes memory) {
         return abi.encode(leaf.typeId, leaf.inputs);
     }
 
-    function directMerkleLeaf(ProofLeaf calldata leaf) internal pure returns (bytes32) {
-        return keccak256(bytes.concat(keccak256(LibProofStack.directPreimage(leaf))));
+    function directMerkleLeaf(
+        ProofLeaf calldata leaf
+    ) internal pure returns (bytes32) {
+        return
+            keccak256(
+                bytes.concat(keccak256(LibProofStack.directPreimage(leaf)))
+            );
     }
 
-    function directMerkleLeaf(ProofLeaf storage leaf) internal view returns (bytes32) {
-        return keccak256(bytes.concat(keccak256(LibProofStack.directPreimage(leaf))));
+    function directMerkleLeaf(
+        ProofLeaf storage leaf
+    ) internal view returns (bytes32) {
+        return
+            keccak256(
+                bytes.concat(keccak256(LibProofStack.directPreimage(leaf)))
+            );
     }
 
-    function check(ChoiceProof calldata args, mapping(bytes32 => bytes32) storage roots)
-        internal
-        view
-        returns (StackState memory, bool)
-    {
-        StackState memory state = StackState(0, new bytes32[](args.stack.length), 0, 0);
+    function check(
+        ChoiceProof calldata args,
+        mapping(bytes32 => bytes32) storage roots
+    ) internal view returns (StackState memory, bool) {
+        StackState memory state = StackState(
+            0,
+            new bytes32[](args.stack.length),
+            0,
+            0
+        );
 
         if (args.leaves[0].typeId != args.choiceSetType) {
             revert ProofStack_MustStartWithChoiceSet();
@@ -94,7 +112,10 @@ library LibProofStack {
                     // require that it has a back ref to ensure all entries
                     // derived from a choice set form a logical chain through
                     // the merkle tree.
-                    if (args.stack[i].inputRefs.length == 0 && args.stack[i].proofRefs.length == 0) {
+                    if (
+                        args.stack[i].inputRefs.length == 0 &&
+                        args.stack[i].proofRefs.length == 0
+                    ) {
                         revert ProofStack_MustBeDerivedFromChoiceSet();
                     }
                     // TODO: consider making the revers returns and letting the caller revert or not.
@@ -117,11 +138,17 @@ library LibProofStack {
             }
 
             bytes32 merkleLeaf = LibProofStack.entryLeafNode(args, state, i);
-            console.log("merkleLeaf & proof[0]:");
+            console.log('merkleLeaf & proof[0]:');
             console.logBytes32(merkleLeaf);
             console.logBytes32(args.stack[i].proof[0]);
 
-            if (!MerkleProof.verifyCalldata(args.stack[i].proof, roots[args.stack[i].rootLabel], merkleLeaf)) {
+            if (
+                !MerkleProof.verifyCalldata(
+                    args.stack[i].proof,
+                    roots[args.stack[i].rootLabel],
+                    merkleLeaf
+                )
+            ) {
                 return (state, false);
             }
 
@@ -129,34 +156,41 @@ library LibProofStack {
             // the most recent refers to leaves associated with the earlier
             // choice set (below the floor). Note: this clause alows for > 2
             // choice sets for now.
-            if (i == args.stack.length - 1 && state.lastChoiceSet > 1 && state.floorBreached != 1) {
+            if (
+                i == args.stack.length - 1 &&
+                state.lastChoiceSet > 1 &&
+                state.floorBreached != 1
+            ) {
                 revert ProofStack_MustDeriveFromBothChoiceSet();
             }
 
-            console.log("proven %d", i);
+            console.log('proven %d', i);
 
             state.proven[i] = merkleLeaf;
         }
         return (state, true);
     }
 
-    function entryLeafNode(ChoiceProof calldata args, StackState memory state, uint256 i)
-        internal
-        pure
-        returns (bytes32)
-    {
-        if (args.stack[i].inputRefs.length == 0 && args.stack[i].proofRefs.length == 0) {
+    function entryLeafNode(
+        ChoiceProof calldata args,
+        StackState memory state,
+        uint256 i
+    ) internal pure returns (bytes32) {
+        if (
+            args.stack[i].inputRefs.length == 0 &&
+            args.stack[i].proofRefs.length == 0
+        ) {
             return LibProofStack.directMerkleLeaf(args.leaves[i]);
         } else {
             return LibProofStack.entryIndirectLeafNode(args, state, i);
         }
     }
 
-    function entryIndirectLeafNode(ChoiceProof calldata args, StackState memory state, uint256 i)
-        internal
-        pure
-        returns (bytes32)
-    {
+    function entryIndirectLeafNode(
+        ChoiceProof calldata args,
+        StackState memory state,
+        uint256 i
+    ) internal pure returns (bytes32) {
         StackProof calldata item = args.stack[i];
         ProofLeaf calldata leaf = args.leaves[i];
 
@@ -181,8 +215,11 @@ library LibProofStack {
             // need too.
 
             // is the next reference the input currently being collected ?
-            if (nextProofRef < item.proofRefs.length && item.proofRefs[nextProofRef] == j) {
-                console.log("STACK(%d)[%d] PROOF REF ---", i, j);
+            if (
+                nextProofRef < item.proofRefs.length &&
+                item.proofRefs[nextProofRef] == j
+            ) {
+                console.log('STACK(%d)[%d] PROOF REF ---', i, j);
                 if (leaf.inputs[j].length != 1) {
                     revert ProofStack_ProoRefInvalid();
                 }
@@ -190,7 +227,9 @@ library LibProofStack {
                 bytes32 value = leaf.inputs[j][leaf.inputs[j].length - 1];
 
                 if (uint256(value) < state.lastChoiceSet) {
-                    if (i != args.stack.length - 1 || state.floorBreached != 0) {
+                    if (
+                        i != args.stack.length - 1 || state.floorBreached != 0
+                    ) {
                         // The transition references must span the floor, two below the floor or two above are both invalid.
                         revert ProofStack_ReferenceFloorBreach();
                     } else {
@@ -199,14 +238,17 @@ library LibProofStack {
                 }
 
                 // It is a back reference to a node proven by a lower stack item.
-                console.log("proof index %d", uint256(value));
+                console.log('proof index %d', uint256(value));
 
                 inputs[j][0] = state.proven[uint256(value)];
-                console.log("proof value %s", uint256(inputs[j][0]));
+                console.log('proof value %s', uint256(inputs[j][0]));
 
                 nextProofRef++;
-            } else if (nextInputRef < item.inputRefs.length && item.inputRefs[nextInputRef] == j) {
-                console.log("STACK(%d)[%d] INPUT REF ---", i, j);
+            } else if (
+                nextInputRef < item.inputRefs.length &&
+                item.inputRefs[nextInputRef] == j
+            ) {
+                console.log('STACK(%d)[%d] INPUT REF ---', i, j);
                 // Note: the value refered to here cannot be a reference. (or if it is it is not resolved to the target value)
 
                 // It is an input ref there must be *at least* two values, the stack position and the input index.
@@ -216,9 +258,13 @@ library LibProofStack {
                 }
 
                 // index back from the end of the input so we can have other values *before* the stack position
-                uint256 stackPos = uint256(leaf.inputs[j][leaf.inputs[j].length - 2]);
+                uint256 stackPos = uint256(
+                    leaf.inputs[j][leaf.inputs[j].length - 2]
+                );
                 if (stackPos < state.lastChoiceSet) {
-                    if (i != args.stack.length - 1 || state.floorBreached != 0) {
+                    if (
+                        i != args.stack.length - 1 || state.floorBreached != 0
+                    ) {
                         // Each choice set establishes a 'floor'. Transition
                         // references, which result in a new choice set, must
                         // span the floor in order to demonstrate a connection between
@@ -229,31 +275,40 @@ library LibProofStack {
                     }
                 }
 
-                console.log("proof index %d", stackPos);
+                console.log('proof index %d', stackPos);
 
                 // The input reference is the last input item, henge length - 1
-                bytes32[] calldata referedInput =
-                    args.leaves[stackPos].inputs[uint256(leaf.inputs[j][leaf.inputs[j].length - 1])];
+                bytes32[] calldata referedInput = args.leaves[stackPos].inputs[
+                    uint256(leaf.inputs[j][leaf.inputs[j].length - 1])
+                ];
 
                 // allocate space for target leaf hash + refered inputs
                 inputs[j] = new bytes32[](referedInput.length + 1);
 
                 inputs[j][0] = state.proven[stackPos];
-                console.log("proof value");
+                console.log('proof value');
                 console.logBytes32(inputs[j][0]);
 
                 for (uint256 k = 0; k < referedInput.length; k++) {
                     inputs[j][k + 1] = referedInput[k];
-                    console.log("iref: inputs %d", k + 1);
-                    console.log("proof input: %d, %d", k + 1, uint256(inputs[j][k + 1]));
+                    console.log('iref: inputs %d', k + 1);
+                    console.log(
+                        'proof input: %d, %d',
+                        k + 1,
+                        uint256(inputs[j][k + 1])
+                    );
                     console.logBytes32(referedInput[k]);
                 }
                 nextInputRef++;
             } else {
-                console.log("STACK (%d)[%d] DIRECT PROOF ---", i, j);
+                console.log('STACK (%d)[%d] DIRECT PROOF ---', i, j);
                 for (uint256 k = 0; k < leaf.inputs[j].length; k++) {
                     inputs[j][k] = leaf.inputs[j][k];
-                    console.log("noref: inputs %d, %d", k, uint256(inputs[j][k]));
+                    console.log(
+                        'noref: inputs %d, %d',
+                        k,
+                        uint256(inputs[j][k])
+                    );
                 }
             }
             // else the value is not a reference and it needs no further
@@ -261,8 +316,13 @@ library LibProofStack {
         }
 
         bytes memory encoded = abi.encode(leaf.typeId, inputs);
-        console.log("encoded");
+        console.log('encoded');
         console.logBytes(encoded);
-        return keccak256(bytes.concat(keccak256(bytes.concat(abi.encode(leaf.typeId, inputs)))));
+        return
+            keccak256(
+                bytes.concat(
+                    keccak256(bytes.concat(abi.encode(leaf.typeId, inputs)))
+                )
+            );
     }
 }

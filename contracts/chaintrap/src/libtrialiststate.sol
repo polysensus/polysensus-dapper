@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.23;
 
-import {TranscriptInitArgs} from "./libtranscriptstructs.sol";
+import {TranscriptInitArgs} from './libtranscriptstructs.sol';
 
 struct TrialistState {
     uint256 flags;
@@ -18,8 +18,12 @@ uint256 constant TRIALISTSTATE_FLAG_INITIALISED = 0x0000000000000000000000000000
 /// ---------------------------
 /// @dev TrialistState read methods
 
-function trialistIsInitialised(TrialistState storage state) view returns (bool) {
-    return (state.flags & TRIALISTSTATE_FLAG_INITIALISED) == TRIALISTSTATE_FLAG_INITIALISED;
+function trialistIsInitialised(
+    TrialistState storage state
+) view returns (bool) {
+    return
+        (state.flags & TRIALISTSTATE_FLAG_INITIALISED) ==
+        TRIALISTSTATE_FLAG_INITIALISED;
 }
 
 function trialistInitCheck(TrialistInitArgs calldata args) pure returns (bool) {
@@ -31,7 +35,10 @@ function trialistInitCheck(TrialistInitArgs calldata args) pure returns (bool) {
 /// @dev TrialistState update methods
 /// NOTICE! The caller is responsible for doing the appropriate checks (by calling
 /// trialistInitCheck for example), these functions are effects only
-function trialistInit(TrialistState storage state, TrialistInitArgs storage args) {
+function trialistInit(
+    TrialistState storage state,
+    TrialistInitArgs storage args
+) {
     state.flags = args.flags;
 
     // Whatever other flags are set, the INITIALISED flag is un-conditional

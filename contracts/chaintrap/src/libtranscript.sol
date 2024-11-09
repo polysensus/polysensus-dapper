@@ -1,37 +1,57 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.23;
 
-import {MerkleProof} from "@openzeppelin-contracts-5.1.0/utils/cryptography/MerkleProof.sol";
-import {console} from "forge-std-1.9.4/console.sol";
-import {StackProof, ProofLeaf, LibProofStack, ChoiceProof, StackState} from "./libproofstack.sol";
-import {
-    TrialistState,
-    TrialistInitArgs,
-    trialistIsInitialised,
-    trialistInitCheck,
-    trialistInit
-} from "./libtrialiststate.sol";
-import {TranscriptInitArgs, TranscriptStartArgs} from "./libtranscriptstructs.sol";
+import {MerkleProof} from '@openzeppelin-contracts-5.1.0/utils/cryptography/MerkleProof.sol';
+import {console} from 'forge-std-1.9.4/console.sol';
+import {StackProof, ProofLeaf, LibProofStack, ChoiceProof, StackState} from './libproofstack.sol';
+import {TrialistState, TrialistInitArgs, trialistIsInitialised, trialistInitCheck, trialistInit} from './libtrialiststate.sol';
+import {TranscriptInitArgs, TranscriptStartArgs} from './libtranscriptstructs.sol';
 
-import "./interfaces/ITranscriptErrors.sol";
+import './interfaces/ITranscriptErrors.sol';
 
-event TranscriptCreated(uint256 indexed id, address indexed creator, uint256 registrationLimit);
+event TranscriptCreated(
+    uint256 indexed id,
+    address indexed creator,
+    uint256 registrationLimit
+);
 
 event TranscriptStarted(uint256 indexed id);
 
 event TranscriptCompleted(uint256 indexed id);
 
 /// @dev emitted when a participant is registered
-event TranscriptRegistration(uint256 indexed id, address indexed participant, bytes profile);
+event TranscriptRegistration(
+    uint256 indexed id,
+    address indexed participant,
+    bytes profile
+);
 
-event TranscriptParticipantHalted(uint256 indexed id, address indexed participant, uint256 lastEID);
+event TranscriptParticipantHalted(
+    uint256 indexed id,
+    address indexed participant,
+    uint256 lastEID
+);
 
-event TranscriptParticipantLivesAdded(uint256 indexed id, address indexed participant, uint256 lives, uint256 added);
+event TranscriptParticipantLivesAdded(
+    uint256 indexed id,
+    address indexed participant,
+    uint256 lives,
+    uint256 added
+);
 
-event TranscriptParticipantLivesLost(uint256 indexed id, address indexed participant, uint256 lives, uint256 lost);
+event TranscriptParticipantLivesLost(
+    uint256 indexed id,
+    address indexed participant,
+    uint256 lives,
+    uint256 lost
+);
 
 /// @dev emited when a root is initialised or changed
-event TranscriptMerkleRootSet(uint256 indexed id, bytes32 indexed label, bytes32 indexed root);
+event TranscriptMerkleRootSet(
+    uint256 indexed id,
+    bytes32 indexed label,
+    bytes32 indexed root
+);
 
 /// ---------------------------
 /// @dev individual transcript entries (turns)
@@ -40,12 +60,21 @@ event TranscriptMerkleRootSet(uint256 indexed id, bytes32 indexed label, bytes32
 /// transcript entry. The eid is 0 when setting the starting choices and
 /// data.
 event TranscriptEntryChoices(
-    uint256 indexed id, address indexed participant, uint256 eid, ProofLeaf choices, bytes data
+    uint256 indexed id,
+    address indexed participant,
+    uint256 eid,
+    ProofLeaf choices,
+    bytes data
 );
 
 /// @dev emitted when a participant commits to a choice.
 event TranscriptEntryCommitted(
-    uint256 indexed id, address indexed participant, uint256 eid, bytes32 rootLabel, uint256 inputChoice, bytes data
+    uint256 indexed id,
+    address indexed participant,
+    uint256 eid,
+    bytes32 rootLabel,
+    uint256 inputChoice,
+    bytes data
 );
 
 /// @dev emitted when the transcript creator (or advocate) resolves a pending committed entry
@@ -207,7 +236,9 @@ library LibTranscript {
     }
 
     // countHalted counts the number of registrants that have been halted
-    function countHalted(Transcript storage self) internal view returns (uint256) {
+    function countHalted(
+        Transcript storage self
+    ) internal view returns (uint256) {
         uint256 n = 0;
         for (uint256 i = 0; i < self.registered.length; i++) {
             if (self.cursors[self.registered[i]] == TRANSCRIPT_CURSOR_HALTED) {
@@ -217,20 +248,26 @@ library LibTranscript {
         return n;
     }
 
-    function _transitionTypes(Transcript storage self) internal view returns (TranscriptTransitionTypes storage) {
+    function _transitionTypes(
+        Transcript storage self
+    ) internal view returns (TranscriptTransitionTypes storage) {
         return self.transitionTypes[DIAMOND_NESTED_STRUCT];
     }
 
-    function _trialistState(Transcript storage self, address participant)
-        internal
-        view
-        returns (TrialistState storage)
-    {
+    function _trialistState(
+        Transcript storage self,
+        address participant
+    ) internal view returns (TrialistState storage) {
         return self.trialistStates[participant];
     }
 
     /// @dev initialise the transcript
-    function _init(Transcript storage self, uint256 id, address creator, TranscriptInitArgs calldata args) internal {
+    function _init(
+        Transcript storage self,
+        uint256 id,
+        address creator,
+        TranscriptInitArgs calldata args
+    ) internal {
         // Note the zero'th game is marked Invalid to ensure it can't be initialised
         if (self.state > State.Unknown) revert Transcript_IsInitialised();
 
@@ -266,27 +303,40 @@ library LibTranscript {
 
         self._transitionTypes().choiceInputs = args.choiceInputTypes;
         self._transitionTypes().all = args.transitionTypes;
-        self._transitionTypes().victoryTransitions = args.victoryTransitionTypes;
-        self._transitionTypes().haltParticipantTransitions = args.haltParticipantTransitionTypes;
+        self._transitionTypes().victoryTransitions = args
+            .victoryTransitionTypes;
+        self._transitionTypes().haltParticipantTransitions = args
+            .haltParticipantTransitionTypes;
         self._transitionTypes().livesIncrement = args.livesIncrement;
         self._transitionTypes().livesDecrement = args.livesDecrement;
 
         for (uint256 i = 0; i < args.roots.length; i++) {
             // Note: solidity reverts for array out of bounds so we don't check for array length equivelence.
             self.roots[args.rootLabels[i]] = args.roots[i];
-            emit TranscriptMerkleRootSet(self.id, args.rootLabels[i], args.roots[i]);
+            emit TranscriptMerkleRootSet(
+                self.id,
+                args.rootLabels[i],
+                args.roots[i]
+            );
         }
         emit TranscriptCreated(self.id, creator, args.registrationLimit);
     }
 
-    function register(Transcript storage self, address participant, bytes calldata profile) internal {
+    function register(
+        Transcript storage self,
+        address participant,
+        bytes calldata profile
+    ) internal {
         if (self.state != State.Initialised) {
             revert Transcript_RegistrationClosed();
         }
         if (self.cursors[participant] != 0) {
             revert Transcript_AlreadyRegistered();
         }
-        if (self.registered.length == self.registrationLimit && self.registrationLimit != 0) {
+        if (
+            self.registered.length == self.registrationLimit &&
+            self.registrationLimit != 0
+        ) {
             revert Transcript_RegistrationFull();
         }
 
@@ -299,25 +349,40 @@ library LibTranscript {
         TrialistState storage ts = self.trialistStates[participant];
         trialistInit(ts, self.trialistInit);
 
-        emit TranscriptParticipantLivesAdded(self.id, participant, ts.lives, self.trialistInit.lives);
+        emit TranscriptParticipantLivesAdded(
+            self.id,
+            participant,
+            ts.lives,
+            self.trialistInit.lives
+        );
     }
 
-    function start(Transcript storage self, TranscriptStartArgs calldata args) internal {
+    function start(
+        Transcript storage self,
+        TranscriptStartArgs calldata args
+    ) internal {
         if (self.state != State.Initialised) revert Transcript_NotReady();
         self.state = State.Started;
         emit TranscriptStarted(self.id);
         for (uint256 i = 0; i < self.registered.length; i++) {
             // require proof that the initial exit choices are committed to an
             // identified merkle trie.
-            bytes32 merkleLeaf = LibProofStack.directMerkleLeaf(args.choices[i]);
-            console.log("merkleLeaf");
+            bytes32 merkleLeaf = LibProofStack.directMerkleLeaf(
+                args.choices[i]
+            );
+            console.log('merkleLeaf');
             console.logBytes32(merkleLeaf);
 
             if (!self.checkRoot(args.proofs[i], args.rootLabel, merkleLeaf)) {
                 revert Transcript_InvalidStartChoice();
             }
 
-            self._revealChoices(0, self.registered[i], args.choices[i], args.data[i]);
+            self._revealChoices(
+                0,
+                self.registered[i],
+                args.choices[i],
+                args.data[i]
+            );
         }
     }
 
@@ -330,21 +395,30 @@ library LibTranscript {
     /// ---------------------------
     /// @dev actions & outcomes
 
-    function _haltParticipant(Transcript storage self, address participant) internal {
+    function _haltParticipant(
+        Transcript storage self,
+        address participant
+    ) internal {
         // Note: if the participant isn't registered, it can't impact the result of countHalted
         uint256 lastEID = self.cursors[participant];
         if (lastEID == 0) revert Transcript_NotRegistered();
 
         self.cursors[participant] = TRANSCRIPT_CURSOR_HALTED;
         emit TranscriptParticipantHalted(self.id, participant, lastEID);
-        console.log("halted participant %s", participant);
+        console.log('halted participant %s', participant);
     }
 
-    function haltParticipant(Transcript storage self, TranscriptOutcome calldata argument) internal {
+    function haltParticipant(
+        Transcript storage self,
+        TranscriptOutcome calldata argument
+    ) internal {
         self._haltParticipant(argument.participant);
     }
 
-    function haltAllExcept(Transcript storage self, address participant) internal {
+    function haltAllExcept(
+        Transcript storage self,
+        address participant
+    ) internal {
         for (uint256 i = 0; i < self.registered.length; i++) {
             if (self.registered[i] == participant) continue;
 
@@ -353,25 +427,42 @@ library LibTranscript {
     }
 
     /// @dev decrements the player lives, and halts if 0
-    function trialistApplyFatality(Transcript storage self, TranscriptOutcome calldata argument)
-        internal
-        returns (bool)
-    {
+    function trialistApplyFatality(
+        Transcript storage self,
+        TranscriptOutcome calldata argument
+    ) internal returns (bool) {
         TrialistState storage ts = self.trialistStates[argument.participant];
         if (ts.lives == 0) return true; // already dead
         ts.lives -= 1;
-        emit TranscriptParticipantLivesLost(self.id, argument.participant, ts.lives, 1);
+        emit TranscriptParticipantLivesLost(
+            self.id,
+            argument.participant,
+            ts.lives,
+            1
+        );
         return (ts.lives == 0); // true if lives ran out
     }
 
-    function trialistAddLives(Transcript storage self, TranscriptOutcome calldata argument, uint256 adding) internal {
+    function trialistAddLives(
+        Transcript storage self,
+        TranscriptOutcome calldata argument,
+        uint256 adding
+    ) internal {
         if (adding == 0) return;
         TrialistState storage ts = self.trialistStates[argument.participant];
         ts.lives += adding;
-        emit TranscriptParticipantLivesAdded(self.id, argument.participant, ts.lives, adding);
+        emit TranscriptParticipantLivesAdded(
+            self.id,
+            argument.participant,
+            ts.lives,
+            adding
+        );
     }
 
-    function revealChoices(Transcript storage self, TranscriptOutcome calldata argument) internal {
+    function revealChoices(
+        Transcript storage self,
+        TranscriptOutcome calldata argument
+    ) internal {
         self._revealChoices(
             self.cursors[argument.participant],
             argument.participant,
@@ -389,14 +480,19 @@ library LibTranscript {
     ) internal {
         delete self.choices[participant];
         self.choices[participant] = choices;
-        console.log("choices revealed ---- %d %d", choices.typeId, choices.inputs.length);
+        console.log(
+            'choices revealed ---- %d %d',
+            choices.typeId,
+            choices.inputs.length
+        );
         emit TranscriptEntryChoices(self.id, participant, eid, choices, data);
     }
 
-    function entryCommit(Transcript storage self, address participant, TranscriptCommitment calldata commitment)
-        internal
-        returns (uint256)
-    {
+    function entryCommit(
+        Transcript storage self,
+        address participant,
+        TranscriptCommitment calldata commitment
+    ) internal returns (uint256) {
         // Game state requirements, must be started and not complete.
         if (self.state != State.Started) revert Transcript_NotStarted();
 
@@ -432,7 +528,9 @@ library LibTranscript {
         // new action until there previous action was resolved. Accepted or
         // Rejected outome values represent resolution.
 
-        TranscriptEntry storage cur = self.transcript[self.cursors[participant]];
+        TranscriptEntry storage cur = self.transcript[
+            self.cursors[participant]
+        ];
 
         // The outcome zero value is Outcome.Invalid. This is what we get if the
         // participant hasn't commited to *any* action yet. Otherwise, the
@@ -458,7 +556,7 @@ library LibTranscript {
         // Set the registered cursor to the  registered pending entry.
         self.cursors[participant] = eid;
 
-        console.log("comment eid for %s", participant);
+        console.log('comment eid for %s', participant);
         console.logUint(uint256(eid));
 
         emit TranscriptEntryCommitted(
@@ -472,23 +570,43 @@ library LibTranscript {
         return eid;
     }
 
-    function arrayContains(uint256[] storage array, uint256 value) internal view returns (bool) {
+    function arrayContains(
+        uint256[] storage array,
+        uint256 value
+    ) internal view returns (bool) {
         for (uint256 i = 0; i < array.length; i++) {
             if (array[i] == value) return true;
         }
         return false;
     }
 
-    function checkChoiceProof(Transcript storage self, ChoiceProof calldata proof) internal view {
-        if (!LibTranscript.arrayContains(self._transitionTypes().choiceInputs, proof.choiceSetType)) {
+    function checkChoiceProof(
+        Transcript storage self,
+        ChoiceProof calldata proof
+    ) internal view {
+        if (
+            !LibTranscript.arrayContains(
+                self._transitionTypes().choiceInputs,
+                proof.choiceSetType
+            )
+        ) {
             revert Transcript_ChoiceSetTypeInvalid();
         }
-        if (!LibTranscript.arrayContains(self._transitionTypes().all, proof.transitionType)) {
+        if (
+            !LibTranscript.arrayContains(
+                self._transitionTypes().all,
+                proof.transitionType
+            )
+        ) {
             revert Transcript_TransitionTypeInvalid();
         }
     }
 
-    function entryReveal(Transcript storage self, address advocate, TranscriptOutcome calldata argument) internal {
+    function entryReveal(
+        Transcript storage self,
+        address advocate,
+        TranscriptOutcome calldata argument
+    ) internal {
         // Game state requirements, must be started and not complete.
         if (self.state != State.Started) revert Transcript_NotStarted();
 
@@ -509,20 +627,23 @@ library LibTranscript {
             // two players can't have the same eid because of how they are allocated.
             if (otherEID > eid) continue;
 
-            if (self.transcript[otherEID].outcome == LibTranscript.Outcome.Pending) {
+            if (
+                self.transcript[otherEID].outcome ==
+                LibTranscript.Outcome.Pending
+            ) {
                 revert Transcript_EarlierPendingOutcomeExists();
             }
         }
 
         TranscriptEntry storage cur = self.transcript[eid];
-        console.log("comment eid for %s", argument.participant);
+        console.log('comment eid for %s', argument.participant);
         console.logUint(uint256(eid));
 
-        console.log("outcome");
+        console.log('outcome');
         console.logUint(uint256(cur.outcome));
-        console.log("cur.rootLabel");
+        console.log('cur.rootLabel');
         console.logBytes32(cur.rootLabel);
-        console.log("stack[0].rootLabel");
+        console.log('stack[0].rootLabel');
         console.logBytes32(argument.proof.stack[0].rootLabel);
 
         if (cur.outcome != LibTranscript.Outcome.Pending) {
@@ -534,7 +655,10 @@ library LibTranscript {
                 revert Transcript_OutcomeExpectedProof();
             }
 
-            (StackState memory state, bool ok) = LibProofStack.check(argument.proof, self.roots);
+            (StackState memory state, bool ok) = LibProofStack.check(
+                argument.proof,
+                self.roots
+            );
             if (!ok) revert Transcript_OutcomeVerifyFailed();
 
             // Check that one of the proven entries matches the participants
@@ -543,14 +667,23 @@ library LibTranscript {
             // on the order or placement of the node in the stack, just that it
             // exists and is labeled correctly - this is insufficient, but more
             // to follow.
-            bytes32 choiceLeaf = LibProofStack.directMerkleLeaf(self.choices[argument.participant]);
+            bytes32 choiceLeaf = LibProofStack.directMerkleLeaf(
+                self.choices[argument.participant]
+            );
 
             // The choice / consenquent stack semantics require that the first
             // proof is a choice set. Here we require that it is also the choice
             // set that was available to the participant.
-            console.log("proven[0] %d = %d ?", uint256(state.proven[0]), uint256(choiceLeaf));
+            console.log(
+                'proven[0] %d = %d ?',
+                uint256(state.proven[0]),
+                uint256(choiceLeaf)
+            );
 
-            if (state.proven[0] != choiceLeaf || argument.proof.stack[0].rootLabel != cur.rootLabel) {
+            if (
+                state.proven[0] != choiceLeaf ||
+                argument.proof.stack[0].rootLabel != cur.rootLabel
+            ) {
                 revert Transcript_OutcomeNotProven();
             }
 
@@ -566,32 +699,48 @@ library LibTranscript {
         // this.
         cur.outcome = argument.outcome;
 
-        emit TranscriptEntryOutcome(self.id, cur.participant, eid, advocate, cur.rootLabel, cur.outcome, argument.data);
+        emit TranscriptEntryOutcome(
+            self.id,
+            cur.participant,
+            eid,
+            advocate,
+            cur.rootLabel,
+            cur.outcome,
+            argument.data
+        );
     }
 
     /// ---------------------------
     /// @dev proof checking and root maintenance
 
-    function checkProofStack(Transcript storage self, ChoiceProof calldata proof)
-        internal
-        view
-        returns (bytes32[] memory, bool)
-    {
-        (StackState memory state, bool ok) = LibProofStack.check(proof, self.roots);
+    function checkProofStack(
+        Transcript storage self,
+        ChoiceProof calldata proof
+    ) internal view returns (bytes32[] memory, bool) {
+        (StackState memory state, bool ok) = LibProofStack.check(
+            proof,
+            self.roots
+        );
         return (state.proven, ok);
     }
 
     /// @dev checkRoot returns true if the proof for the lableled root is correct
-    function checkRoot(Transcript storage self, bytes32[] calldata proof, bytes32 label, bytes32 node)
-        internal
-        view
-        returns (bool)
-    {
+    function checkRoot(
+        Transcript storage self,
+        bytes32[] calldata proof,
+        bytes32 label,
+        bytes32 node
+    ) internal view returns (bool) {
         return MerkleProof.verifyCalldata(proof, self.roots[label], node);
     }
 
     /// @dev verifyRoot reverts with Transcript_VerifyFailed if the proof for the lableled root is incorrect.
-    function verifyRoot(Transcript storage self, bytes32[] calldata proof, bytes32 label, bytes32 node) internal view {
+    function verifyRoot(
+        Transcript storage self,
+        bytes32[] calldata proof,
+        bytes32 label,
+        bytes32 node
+    ) internal view {
         if (!checkRoot(self, proof, label, node)) {
             revert Transcript_VerifyFailed();
         }
