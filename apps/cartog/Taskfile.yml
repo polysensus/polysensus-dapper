@@ -1,0 +1,12 @@
+version: '3'
+
+dotenv:
+  - ".env"
+  - ".env.secret"
+
+tasks:
+  abi:
+    desc: "output the abi"
+    cmds:
+      - |
+        task -d $CONTRACTS_CHAINTRAP_DIR abi

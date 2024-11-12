@@ -6,6 +6,7 @@ import { program } from "commander";
 
 import { addExplodeCommand } from "./explodesvg.js";
 import { addMerklizeCommand } from "./merkleize.js";
+import { addCreateGameCommand } from "./creategame.js";
 
 program
   .enablePositionalOptions()
@@ -13,6 +14,7 @@ program
 
 addExplodeCommand(program);
 addMerklizeCommand(program);
+addCreateGameCommand(program);
 
 try {
   program.parse();

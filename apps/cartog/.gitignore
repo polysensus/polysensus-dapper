@@ -1,2 +1,4 @@
 dist
 dungeon
+abi.json
+.env.secrets*

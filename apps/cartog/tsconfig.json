@@ -13,7 +13,7 @@
       "allowSyntheticDefaultImports": true,
       "sourceMap": true,
     },
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*.ts", "../../packages/svelte-onepagedungeon/src/lib/mapformats/chaintrap/merkle/proofstack.ts"],
     "exclude": ["node_modules", "dist"]
 /*
   "compilerOptions": {

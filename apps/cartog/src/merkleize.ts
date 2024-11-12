@@ -1,18 +1,14 @@
 import type { Command } from "commander";
 import { InvalidArgumentError } from "commander";
 
-import { parseDungeon } from "@polysensus-dapper/svelte-onepagedungeon"
-//import type { Dungeon } from "@polysensus-dapper/svelte-onepagedungeon";
-import type { JsonDungeon } from "@polysensus-dapper/svelte-onepagedungeon";
-//import { readJson, readText, writeSVGTile, writeTextFile } from "./fsutil.js";
+import { createTopology } from "./createtopology.js";
+
+import {
+  parseDungeon,
+} from "@polysensus-dapper/svelte-onepagedungeon"
 import { DungeonOptions, dungeonName, resolveSeed, loadJsonDugeon } from "./jsondungeon.js";
 
-// import type { JSONConnection, Dungeon, ObjectType, Point, Door } from "@polysensus-dapper/svelte-onepagedungeon";
-import type { JSONConnection as CTJSONConnection } from "@polysensus-dapper/svelte-onepagedungeon";
-import type {
-  Door as WatDoor,
-  Room as WatRoom
-} from "@polysensus-dapper/svelte-onepagedungeon";
+// import * as abi from "@polysensus-dapper/chaintrap";
 
 function parseBase10(value: string): number {
   const parsed = parseInt(value, 10);
@@ -38,6 +34,7 @@ const out = console.log;
 let vout = (...args: any[]) => { };
 
 function merklize(program: Command, options: DungeonOptions) {
+  // out(JSON.stringify(abi, null, '  '));
   out(`Analyzing file: ${options.file}`);
   if (!options.output)
     throw new Error("Output directory not specified");
@@ -48,14 +45,13 @@ function merklize(program: Command, options: DungeonOptions) {
   const seed = resolveSeed(options, watabouJson);
   const dungeon = parseDungeon(seed, watabouJson);
   const s = JSON.stringify(dungeon, null, '  ')
+  const topo = createTopology(dungeon, name);
+  const tree = topo.commit();
 
-  // The relationship bewtween the watabou format and the chaintrap format is esesntially 1:1 for things that matter.
-  // * Watabou room or area-rect has at most 4 exits - chain trap has arbitrary exits per side.
-  // * Watabou sorts exits clockwise from the top - chaintrap sorts anti-clockwise.
-  // * Watabou doors corresponds to a chaintrap connection/corridor
-  // * Watabou doors (connections) are unit squares
-  // * Watabou doors (connections) join only opposite sides, chaintrap joins allow for right angled corridor bends.
-
-  const connections: (CTJSONConnection & WatDoor)[] = [];
   out(s);
+  for (const [i, v] of tree.entries()) {
+    const proof = tree.getProof(i);
+    console.log("Value:", v);
+    console.log("Proof:", proof);
+  }
 }
