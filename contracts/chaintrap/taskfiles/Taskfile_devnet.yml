@@ -1,0 +1,105 @@
+version: '3'
+
+# vars:
+#   // Default is the redstone L2 x L1 messenger which has loads of eth
+#   FUNDED_ADDRESS: {{.FUNDED_ADDRESS | default "0x4200000000000000000000000000000000000016"}}
+
+vars:
+  NET_CLASS: '{{.NETWORK_KIND | default "devnet"}}'
+tasks:
+
+  help-*:
+    desc: extended help and reminders
+    vars:
+      ENV_NAME: '{{index .MATCH 0}}'
+    dotenv:
+      - .env.{{.NET_CLASS}}.{{.ENV_NAME}}
+    cmds:
+      - |
+        echo "
+        RPC_URL: $RPC_URL
+        FUNDED_ADDRESS: $FUNDED_ADDRESS
+        DEPLOY_PUB: $DEPLOY_PUB
+
+        Recipies
+          todo
+        
+        "
+  env-*:
+    desc: show the environment variables for the named fork
+    vars:
+      ENV_NAME: '{{index .MATCH 0}}'
+    cmds:
+      - |
+        cat .env.{{.NET_CLASS}}.{{.ENV_NAME}}
+
+  fund-*:
+    desc: fund the DEPLOY_PUB account from FUNDED_ADDRESS
+    vars:
+      v: '{{.v | default "0.1ether"}}'
+      ENV_NAME: '{{index .MATCH 0}}'
+    dotenv:
+      - .env.{{.NET_CLASS}}.{{.ENV_NAME}}
+    cmds:
+      - |
+
+        # use the transaction browser for the target chain to find a
+        # transaction from any account, check the account balance, if its >
+        # 1ether pick it as the FUNDED_ADDRESS
+        #
+        echo "Balance: FUNDED_ADDRESS=$FUNDED_ADDRESS"
+        cast balance -r $RPC_URL $FUNDED_ADDRESS
+
+        cast send -r $RPC_URL \
+          --value {{.v}} \
+          --from $FUNDED_ADDRESS $DEPLOY_PUB \
+          --unlocked
+
+        echo "Balance: DEPLOY_PUB=$DEPLOY_PUB"
+        cast balance -r $RPC_URL $DEPLOY_PUB
+
+  deploy-*:
+    desc: deply the tug awar game contract
+    vars:
+      dryrun: '{{.dryrun | default false}}'
+      ENV_NAME: '{{index .MATCH 0}}'
+    dotenv:
+      - .env.{{.NET_CLASS}}.{{.ENV_NAME}}
+    cmds:
+      - |
+        echo "RPC_URL $RPC_URL"
+        echo "DEPLOY_PUB $DEPLOY_PUB"
+
+        # XARGS="--skip-simulation {{.CLI_ARGS}}"
+        ! {{.dryrun}} && XARGS="$XARGS --broadcast"
+
+        OUT=deployed.chaintrap
+        OUTLOG=$OUT.log
+        forge script \
+          --legacy \
+          --gas-limit 1053457634 \
+          --sender $DEPLOY_PUB \
+          -a $DEPLOY_PUB \
+          --private-key $DEPLOY_KEY \
+          --rpc-url $RPC_URL scripts/DeployChaintrapArena.s.sol \
+          --json $XARGS \
+          -s 'run()' | tee $OUTLOG 2> /dev/null # \
+
+        echo "XXXX"
+
+
+
+        # > $OUTLOG 2> /dev/null 
+
+        cat $OUTLOG | grep '{"logs":' | jq -r . > ${OUT}.json
+        ADDRESS=$(cat ${OUT}.json | jq -r .logs[0])
+        echo "ADDRESS: $ADDRESS"
+        if {{.dryrun}}; then
+          echo CHAINTRAP_ADDRESS=$ADDRESS
+          exit 0
+        fi
+        echo "export CHAINTRAP_ADDRESS=$ADDRESS" \
+        > .env.{{.NET_CLASS}}.{{.ENV_NAME}}.chaintrap
+
+        echo "export PUBLIC_{{.ENV_NAME | upper}}_CHAINTRAP_ADDRESS=$ADDRESS" \
+        >> .env.{{.NET_CLASS}}.{{.ENV_NAME}}.chaintrap

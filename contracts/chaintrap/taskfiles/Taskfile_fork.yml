@@ -1,0 +1,152 @@
+version: '3'
+
+# vars:
+#   // Default is the redstone L2 x L1 messenger which has loads of eth
+#   FUNDED_ADDRESS: {{.FUNDED_ADDRESS | default "0x4200000000000000000000000000000000000016"}}
+tasks:
+
+  help-*:
+    desc: extended help and reminders
+    vars:
+      ENV_NAME: '{{index .MATCH 0}}'
+    dotenv:
+      - .env.fork.{{.ENV_NAME}}
+    cmds:
+      - |
+        echo "
+        FORK_URL: $FORK_URL
+        RPC_URL: $RPC_URL
+        FUNDED_ADDRESS: $FUNDED_ADDRESS
+        DEPLOY_PUB: $DEPLOY_PUB
+
+        Recipies
+          todo
+        
+        "
+  env-*:
+    desc: show the environment variables for the named fork
+    vars:
+      ENV_NAME: '{{index .MATCH 0}}'
+    cmds:
+      - |
+        cat .env.fork.{{.ENV_NAME}}
+
+  up-*:
+    desc: start a forked instance of the RPC_URL on FORK_URL
+    vars:
+      ENV_NAME: '{{index .MATCH 0}}'
+    dotenv:
+      - .env.fork.{{.ENV_NAME}}
+    cmds:
+      - |
+        echo "FORK_URL: $FORK_URL"
+        rm -f anvil.pid anvil.log
+        # scripts/anvil-daemon.sh anvil --fork-url $FORK_URL
+        scripts/anvil-daemon.sh anvil --fork-url $FORK_URL --ipc anvil.ipc
+        # anvil --fork-url $FORK_URL --ipc anvil.ipc > anvil.log 2>&1 &
+        # ANVIL_PID=$!
+        ANVIL_PID=$(cat anvil.pid)
+        echo "ANVIL_PID: $ANVIL_PID"
+        echo "$ANVIL_PID" > anvil.pid
+        cat anvil.log
+
+        # Ensure anvil is running before proceeding. Allows deploy tasks to follow after
+        while ! socat -u OPEN:/dev/null UNIX-CONNECT:anvil.ipc; do
+          echo "waiting for anvil.ipc"
+          sleep 1
+        done
+
+    status:
+      - socat -u OPEN:/dev/null UNIX-CONNECT:anvil.ipc
+
+  logs-*:
+    desc: show the logs for the forked instance
+    vars:
+      ENV_NAME: '{{index .MATCH 0}}'
+    cmds:
+      - |
+        tail -f anvil.log
+
+  down-*:
+    desc: stop a forked instance (if it is running)
+    vars:
+      ENV_NAME: '{{index .MATCH 0}}'
+    dotenv:
+      - .env.fork.{{.ENV_NAME}}
+    cmds:
+      - |
+        ANVIL_PID=$(cat anvil.pid)
+        echo "KILLING ANVIL_PID: $ANVIL_PID"
+        kill $ANVIL_PID
+    status:
+      - if socat -u OPEN:/dev/null UNIX-CONNECT:anvil.ipc; then exit 1; else exit 0; fi
+
+  fund-*:
+    desc: fund the DEPLOY_PUB account from FUNDED_ADDRESS
+    vars:
+      v: '{{.v | default "0.1ether"}}'
+      ENV_NAME: '{{index .MATCH 0}}'
+    dotenv:
+      - .env.fork.{{.ENV_NAME}}
+    cmds:
+      - |
+
+        # use the transaction browser for the target chain to find a
+        # transaction from any account, check the account balance, if its >
+        # 1ether pick it as the FUNDED_ADDRESS
+        #
+        echo "Balance: FUNDED_ADDRESS=$FUNDED_ADDRESS"
+        cast balance -r $FORK_URL $FUNDED_ADDRESS
+
+        cast rpc -r $RPC_URL \
+          anvil_impersonateAccount $FUNDED_ADDRESS
+        cast send -r $RPC_URL \
+          --value {{.v}} \
+          --from $FUNDED_ADDRESS $DEPLOY_PUB \
+          --unlocked
+
+        echo "Balance: DEPLOY_PUB=$DEPLOY_PUB"
+        cast balance -r $RPC_URL $DEPLOY_PUB
+
+  deploy-*:
+    desc: deply the tug awar game contract
+    vars:
+      dryrun: '{{.dryrun | default false}}'
+      ENV_NAME: '{{index .MATCH 0}}'
+    cmds:
+      - |
+        source .env.fork.{{.ENV_NAME}}
+
+        echo "RPC_URL $RPC_URL"
+        echo "DEPLOY_PUB $DEPLOY_PUB"
+        # echo "DEPLOY_KEY $DEPLOY_KEY" # not needed if a default account is used
+        cast rpc -r $RPC_URL \
+           anvil_impersonateAccount $DEPLOY_PUB
+
+        XARGS="--skip-simulation {{.CLI_ARGS}}"
+        ! {{.dryrun}} && XARGS="$XARGS --broadcast"
+
+        OUT=deployed.chaintrap
+        OUTLOG=$OUT.log
+
+        forge script \
+          --no-cache \
+          --sender $DEPLOY_PUB \
+          -a $DEPLOY_PUB \
+          --rpc-url $RPC_URL scripts/DeployChaintrapArena.s.sol \
+          --json $XARGS \
+          -s 'run()' \
+          > $OUTLOG 2> /dev/null 
+
+        cat $OUTLOG | grep '{"logs":' | jq -r . > ${OUT}.json
+        ADDRESS=$(cat ${OUT}.json | jq -r .logs[0])
+        echo "ADDRESS: $ADDRESS"
+        if {{.dryrun}}; then
+          echo CHAINTRAP_ADDRESS=$ADDRESS
+          exit 0
+        fi
+        echo "export CHAINTRAP_ADDRESS=$ADDRESS" \
+        > .env.fork.{{.ENV_NAME}}.chaintrap
+
+        echo "export PUBLIC_{{.ENV_NAME | upper}}_CHAINTRAP_ADDRESS=$ADDRESS" \
+        >> .env.fork.{{.ENV_NAME}}.chaintrap

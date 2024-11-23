@@ -1,3 +1,21 @@
+# Sensitive env files
+.env.*
+
+# Build
+dependencies
+node_modules
+bun
+dist
+dist-ssr
+*.local
+broadcast/*
+cache/*
+out/*
+
+# Miscelaneous dev files
+anvil.pid
+deployed.chaintrap.json
+
 # Logs
 logs
 *.log
@@ -7,10 +25,6 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
 
 # Editor directories and files
 .vscode/*

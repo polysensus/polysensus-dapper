@@ -1,17 +1,34 @@
 {
-  "name": "@polysensus/chaintrap-contracts",
+  "name": "@polysensus-dapper/chaintrap",
   "version": "0.5.0",
+  "private": true,
+  "type": "module",
+
+
   "files": [
-    "abi"
+    "dist"
   ],
+
+  "main":"./dist/index.umd.js",
+  "module":"./dist/index.js",
+  "types": "./dist/types.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./abi/ChaintrapArena.json": "./dist/ChaintrapArena.json"
+  },
   "scripts": {
-    "build": "forge build && mkdir -p dist/abi && cp -r out/src/arena.sol/*.json dist/abi",
     "test": "forge test",
     "lint": "prettier --check --plugin=prettier-plugin-solidity 'src/**/*.sol'",
-    "format": "prettier --write --plugin=prettier-plugin-solidity  'src/**/*.sol'"
+    "format": "prettier --write --plugin=prettier-plugin-solidity  'src/**/*.sol'",
+    "build": "forge build && vite build",
+    "abi": "cat out/arena.sol/ChaintrapArena.json"
   },
   "devDependencies": {
     "prettier": "^3.3.3",
-    "prettier-plugin-solidity": "^1.4.1"
+    "prettier-plugin-solidity": "^1.4.1",
+    "typescript": "~5.6.2"
   }
 }

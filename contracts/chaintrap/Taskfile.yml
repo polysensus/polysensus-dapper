@@ -1,0 +1,59 @@
+version: '3'
+
+dotenv:
+  - ".env"
+  - ".env.secret"
+
+includes:
+  fork:
+    taskfile: ./taskfiles/Taskfile_fork.yml
+  devnet:
+    taskfile: ./taskfiles/Taskfile_devnet.yml
+
+tasks:
+  abi:
+    desc: "output the abi"
+    cmds:
+      - |
+        cat out/arena.sol/ChaintrapArena.json
+
+  build:
+    desc: "compile the contracts"
+    cmds:
+      - |
+        forge build
+
+  dev:up:
+    alias: test:up
+    desc: |
+      prepare the development integration test environment
+
+      Ensures anvil is running and the contracts are deployed
+      on the target environment
+
+    vars:
+      NET_CLASS: '{{.NETWORK_KIND | default "fork"}}'
+      ENV_NAME: '{{.ENV | default "redstone"}}'
+    cmds:
+      - task: '{{.NET_CLASS}}:up-{{.ENV_NAME}}'
+      - task: '{{.NET_CLASS}}:deploy-{{.ENV_NAME}}'
+    deps:
+      - build
+
+  dev:logs:
+    desc: |
+      show the logs for the dev & test environment
+    vars:
+      NET_CLASS: '{{.NETWORK_KIND | default "fork"}}'
+      ENV_NAME: '{{.ENV | default "redstone"}}'
+    cmds:
+      - task: '{{.NET_CLASS}}:logs-{{.ENV_NAME}}'
+
+  dev:down:
+    desc: |
+      stop the development integration test environment
+    vars:
+      NET_CLASS: '{{.NETWORK_KIND | default "fork"}}'
+      ENV_NAME: '{{.ENV | default "redstone"}}'
+    cmds:
+      - task: '{{.NET_CLASS}}:down-{{.ENV_NAME}}'
