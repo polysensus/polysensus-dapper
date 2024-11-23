@@ -1,5 +1,5 @@
 {
-  "name": "@polysensus-dapper/chaintrap",
+  "name": "@polysensus-dapper/chaintrap-contracts",
   "version": "0.5.0",
   "private": true,
   "type": "module",
