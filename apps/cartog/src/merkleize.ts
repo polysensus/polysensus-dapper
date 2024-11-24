@@ -8,7 +8,7 @@ import {
 } from "@polysensus-dapper/svelte-onepagedungeon"
 import { DungeonOptions, dungeonName, resolveSeed, loadJsonDugeon } from "./jsondungeon.js";
 
-// import * as abi from "@polysensus-dapper/chaintrap";
+// import * as abi from "@polysensus-dapper/chaintrap-contracts";
 
 function parseBase10(value: string): number {
   const parsed = parseInt(value, 10);

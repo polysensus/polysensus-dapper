@@ -1,4 +1,5 @@
 import {
+  parseDungeon,
   facingDirection as watFacingDirection,
   LogicalTopology,
   Furnishing as CTFurnishing,
@@ -19,6 +20,23 @@ import type {
   Room as WatRoom,
   Exit as WatExit,
 } from "@polysensus-dapper/svelte-onepagedungeon";
+
+import type { DungeonOptions } from "./jsondungeon.js";
+import { loadJsonDugeon, dungeonName, resolveSeed } from "./jsondungeon.js";
+
+export function buildTree(options: DungeonOptions) {
+  const topo = loadTopology(options);
+  return topo.commit();
+}
+
+export function loadTopology(options: DungeonOptions): LogicalTopology {
+  const watabouJson = loadJsonDugeon(options.file);
+  const name = dungeonName(watabouJson);
+  const outputDir = options.output.replace("<name>", name);
+  const seed = resolveSeed(options, watabouJson);
+  const dungeon = parseDungeon(seed, watabouJson);
+  return createTopology(dungeon, name);
+}
 
 export function createTopology(dungeon: Dungeon, name: string = "A Chaintrap Dungeon"): LogicalTopology {
 

@@ -1,0 +1,114 @@
+version: '3'
+
+vars:
+  CHAINTRAP_CLI: 'node --no-lazy -r ts-node/register {{.ROOT_DIR}}/dist/index.js'
+  DUNGEONS_DIR: '{{.ROOT_DIR}}/../../packages/svelte-onepagedungeon/static/dungeons'
+  DEFAULT_DUNGEON: 'abandoned_halls_of_the_white_king.json'
+
+tasks:
+
+  help:
+    desc: extended help and reminders
+    dotenv:
+      # Priority is first listed in preference to subsequent
+      - '{{.USER_WORKING_DIR}}/.env.secrets'
+
+    cmds:
+      - |
+        CHAINTRAP_ADDRESS: $CHAINTRAP_ADDRESS
+        NARRATOR_KEY: $NARRATOR_KEY
+        RAIDER_KEY: $RAIDER_KEY
+        ANVIL_KEY0: $ANVIL_KEY0
+        ANVIL_KEY1: $ANVIL_KEY1
+        "
+
+  preflight:
+    cmds:
+      - |
+        task -d $CONTRACTS_CHAINTRAP_DIR fork:down-redstone
+        task -d $CONTRACTS_CHAINTRAP_DIR fork:up-redstone
+        task -d $CONTRACTS_CHAINTRAP_DIR fork:deploy-redstone
+        echo "GAME_ID: 1" > {{.USER_WORKING_DIR}}/.env.session
+        task -d $CONTRACTS_CHAINTRAP_DIR abi > {{.USER_WORKING_DIR}}/abi.json
+
+  test:firstmove:
+    desc: test game creation, single player registration and single commit/reveal round.
+    cmds:
+      - task: preflight
+      - task: creategame
+      - task: registerraider-1-anvil
+      - task: startgame-1-0
+      - task: readchoices-1
+      #- task: commitchoice-1-1-0
+
+
+  creategame:
+    desc: create a game
+    dir: '{{.USER_WORKING_DIR}}'
+    dotenv:
+      # Priority is first listed in preference to subsequent
+      - '{{.USER_WORKING_DIR}}/.env.secrets'
+    cmds:
+      - |
+        {{.CHAINTRAP_CLI}} creategame --seed 1234 --file {{.DUNGEONS_DIR}}/{{.DEFAULT_DUNGEON}}
+
+  readchoices-*:
+    desc: read the most recent choices for the raider
+    dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      GAME_ID: '{{index .MATCH 0}}'
+    dotenv:
+      # Priority is first listed in preference to subsequent
+      - '{{.USER_WORKING_DIR}}/.env.secrets'
+    cmds:
+      - |
+        {{.CHAINTRAP_CLI}} readchoices --game {{.GAME_ID}}
+
+
+  registerraider-*-*:
+    desc: register as a raider for a game
+    dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      GAME_ID: '{{index .MATCH 0}}'
+      NAME: '{{index .MATCH 1}}'
+    dotenv:
+      # Priority is first listed in preference to subsequent
+      - '{{.USER_WORKING_DIR}}/.env.secrets'
+    cmds:
+      - |
+        {{.CHAINTRAP_CLI}} registerraider --game {{.GAME_ID}} --name {{.NAME}}
+
+  startgame-*-*:
+    desc: start a game
+    dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      GAME_ID: '{{index .MATCH 0}}'
+      START0: '{{index .MATCH 1}}'
+      START1: '{{index .MATCH 1 | default ""}}'
+
+    dotenv:
+      # Priority is first listed in preference to subsequent
+      - '{{.USER_WORKING_DIR}}/.env.secrets'
+    cmds:
+      - |
+        {{.CHAINTRAP_CLI}} startgame \
+          --seed 1234 --file {{.DUNGEONS_DIR}}/{{.DEFAULT_DUNGEON}} \
+          --game {{.GAME_ID}} --start {{.START0}} {{.START1}}
+
+  commitchoice-*-*-*:
+    desc: register as a raider for a game
+    dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      GAME_ID: '{{index .MATCH 0}}'
+      # Side 0-3, or open chest and other actions
+      KIND: '{{index .MATCH 1}}'
+      VALUE: '{{index .MATCH 1}}'
+    dotenv:
+      # Priority is first listed in preference to subsequent
+      - '{{.USER_WORKING_DIR}}/.env.secrets'
+    cmds:
+      - |
+        {{.CHAINTRAP_CLI}} commitchoice --game {{.GAME_ID}} --choice {{.KIND}} {{.VALUE}}
+    
+
+
